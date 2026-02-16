@@ -1,0 +1,17 @@
+FROM golang:1.26-alpine
+WORKDIR /app
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+# hot reload
+RUN go install github.com/air-verse/air@latest
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+# ソースはcomposeでマウントするけど、air設定などのために一旦コピーしてOK
+COPY . .
+
+EXPOSE 8080
+ENV GIN_MODE=debug PORT=8080
+CMD ["air", "-c", ".air.toml"]
