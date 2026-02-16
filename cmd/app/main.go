@@ -14,6 +14,6 @@ func main() {
 			"message": "pong",
 		})
 	})
-
+	//ポート8080番でリッスン
 	r.Run()
 }
