@@ -15,7 +15,7 @@ import (
 func RegisterHandler(c *gin.Context) {
 	var json struct {
 		Username string `json:"Username" binding:"required"`
-		Password string `json:"password" binding:"required"`
+		Password string `json:"Password" binding:"required"`
 	}
 
 	if err := c.ShouldBindBodyWithJSON(&json); err != nil {
