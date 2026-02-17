@@ -10,7 +10,7 @@
 
 # Output of go coverage
 *.out
-app
+/app
 
 # Go workspace
 go.work.sum
