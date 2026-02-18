@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -18,11 +16,7 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 
 	r.POST("/register", handler.RegisterHandler)
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+
 	//ポート8080番でリッスン
 	r.Run()
 }
