@@ -95,3 +95,34 @@ func (u *User) UpdateUser(userName string, icon string, profileMessage string) e
 
 	return nil
 }
+
+// ログイン処理
+func (u *User) OnLogin() {
+	prev := u.LatestLoginAt
+
+	u.LatestLoginAt = time.Now()
+
+	if prev.IsZero() {
+		u.StreakLogin = 1
+		return
+	}
+
+	prevDate := dateOnly(prev)
+	nowDate := dateOnly(now)
+
+	if prevDate.Equal(nowDate) {
+		return
+	}
+
+	if prevDate.AddDate(0, 0, 1).Equal(nowDate) {
+		u.StreakLogin++
+	} else {
+		u.StreakLogin = 1
+	}
+}
+
+// 日付だけ取得するメソッド
+func dateOnly(t time.Time) time.Time {
+	y, m, d := t.Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+}
