@@ -189,6 +189,37 @@ func (u *User) addRankPoint(delta int) {
 	u.RankPoint += delta
 }
 
+// AddCoin 通貨を増やす
+func (u *User) AddCoin(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidCoinDelta
+	}
+
+	u.addCoin(amount)
+
+	return nil
+}
+
+// ConsumeCoin 通貨を減らす
+func (u *User) ConsumeCoin(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidCoinDelta
+	}
+
+	if u.Coin < amount {
+		return errs.ErrInsufficientCoin
+	}
+
+	u.addCoin(-amount)
+
+	return nil
+}
+
+// 通貨の値を足す
+func (u *User) addCoin(delta int) {
+	u.Coin += delta
+}
+
 // 日付だけ取り出して4時間前にする関数
 func loginDay(t time.Time) time.Time {
 	shifted := t.Add(-LoginCutoffHour * time.Hour)

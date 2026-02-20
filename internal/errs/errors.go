@@ -8,5 +8,6 @@ var (
 	ErrUserNotFound          = errors.New("ユーザーが存在しません")
 	ErrInvalidBirthday       = errors.New("無効な日付です")
 	ErrInvalidRankPointDelta = errors.New("無効なランクポイントの増加量です")
-	ErrInsufficientRankPoint = errors.New("")
+	ErrInvalidCoinDelta      = errors.New("無効な通貨の増加量です")
+	ErrInsufficientCoin      = errors.New("通貨の量が不十分です")
 )
