@@ -37,7 +37,7 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 
 	return &User{
 		ID:				NewUserID(),
-		UserName:		userName,
+		UserName:		name,
 		Icon:			icon,
 		ProfileMessage:	profileMessage,
 
