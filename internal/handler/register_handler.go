@@ -3,14 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shii-park/friends/internal/domain"
 )
 
 // RegisterHandler はユーザー新規登録を処理するハンドラーです。
-// リクエストボディからユーザー名とパスワードを受け取り、
-// パスワードをbcryptでハッシュ化したうえでユーザー情報を作成します。
 func RegisterHandler(c *gin.Context) {
 	var json struct {
 		Username string `json:"Username" binding:"required"`
@@ -20,18 +18,9 @@ func RegisterHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	//TODO: Userタイプは仮実装．別ファイルに定義する
-	type User struct {
-		ID        uint
-		Username  string
-		CreatedAt time.Time
-		UpdatedAt time.Time
-	}
-	user := User{
-		Username:  json.Username,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+	user, err := domain.NewUser(json.Username, nil, nil, nil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
 	//TODO: ユーザ情報をDBに保存する処理を追加

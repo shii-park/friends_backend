@@ -11,9 +11,12 @@ import (
 const (
 	ResetStreakLoginDay = 1
 	LoginCutoffHour     = 4
+<<<<<<< HEAD
 	InitialRankPoint    = 0
 	InitialCoin         = 0
 	InitialGachaStone   = 0
+=======
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 
 	guestName       = "ゲスト"
 	guestBirthmonth = 1
@@ -22,7 +25,11 @@ const (
 
 type User struct {
 	ID             string `json:"userID"` // 更新しない
+<<<<<<< HEAD
 	Name           string `json:"userName"`
+=======
+	UserName       string `json:"userName"`
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 	Icon           string `json:"icon,omitempty"` // アイコン、stringにしてるが実際どうなるかはわからない
 	ProfileMessage string `json:"profileMsg,omitempty"`
 
@@ -42,9 +49,15 @@ func NewUserID() string {
 	return uuid.NewString()
 }
 
+<<<<<<< HEAD
 // NewUser ユーザーを生成する関数
 func NewUser(name string, icon string, profileMessage string, birthmonth int, birthday int) (*User, error) {
 	formattedName := strings.TrimSpace(name)
+=======
+// ユーザーを生成する関数
+func NewUser(userName string, icon string, profileMessage string, birthday time.Time) (*User, error) {
+	name := strings.TrimSpace(userName)
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 
 	if formattedName == "" {
 		return nil, errs.ErrUserNameRequired
@@ -58,6 +71,7 @@ func NewUser(name string, icon string, profileMessage string, birthmonth int, bi
 
 	return &User{
 		ID:             NewUserID(),
+<<<<<<< HEAD
 		Name:           formattedName,
 		Icon:           icon,
 		ProfileMessage: profileMessage,
@@ -71,6 +85,16 @@ func NewUser(name string, icon string, profileMessage string, birthmonth int, bi
 		RankPoint:  InitialRankPoint,
 		Coin:       InitialCoin,
 		GachaStone: InitialGachaStone,
+=======
+		UserName:       name,
+		Icon:           icon,
+		ProfileMessage: profileMessage,
+
+		Birthday:      birthday,
+		RegisteredAt:  now,
+		LatestLoginAt: now,
+		StreakLogin:   1,
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 	}, nil
 }
 
@@ -98,12 +122,20 @@ func (u *User) UpdateUserName(name string) error {
 	return nil
 }
 
+<<<<<<< HEAD
 // UpdateIcon アイコンの更新処理
+=======
+// アイコンの更新処理
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 func (u *User) UpdateIcon(icon string) {
 	u.Icon = icon
 }
 
+<<<<<<< HEAD
 // UpdateProfileMessage メッセージの更新処理
+=======
+// メッセージの更新処理
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 func (u *User) UpdateProfileMessage(profileMessage string) {
 	u.ProfileMessage = profileMessage
 }
@@ -253,6 +285,7 @@ func loginDay(t time.Time) time.Time {
 	return time.Date(y, m, d, 0, 0, 0, 0, shifted.Location())
 }
 
+<<<<<<< HEAD
 // 月日が正しいか検証する
 func isValidMonthDay(month int, day int) bool {
 	if month < 1 || month > 12 {
@@ -268,4 +301,14 @@ func isValidMonthDay(month int, day int) bool {
 	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 
 	return int(t.Month()) == month && t.Day() == day
+=======
+// 連続ログイン日数を増やす関数
+func (u *User) AddStreakLogin() {
+	u.StreakLogin++
+}
+
+// 連続ログイン日数のリセットする関数
+func (u *User) ResetStreakLogin() {
+	u.StreakLogin = ResetStreakLoginDay
+>>>>>>> 0e68f4c (Fix: ReisterHandler()のユーザ生成処理をdomain.NewUserを使用するように修正)
 }
