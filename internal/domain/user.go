@@ -17,12 +17,12 @@ type User struct {
 	StreakLogin   int       `json:"streakLogin"`
 }
 
-// ユーザーIDを生成するメソッド
+// ユーザーIDを生成する関数
 func NewUserID() {
 	return uuid.NewString()
 }
 
-// ユーザーを生成するメソッド
+// ユーザーを生成する関数
 func NewUser(userName string, icon string, profileMessage string, birthday time.Time)  (*User, error) {
 	name := strings.TrimSpace(userName)
 
@@ -45,11 +45,14 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 	}, nil
 }
 
+// ゲストユーザーを生成する関数
+// ここにおくべきかはちょっと微妙ではある（一応置いておく）
 func NewGuestUser() (*User, error){
 	user, err := NewUser("ゲスト", "", "", time.Time{})
 	return user, err
 }
 
+// ユーザー名の更新処理
 func (u *User) UpdateUserName(userName string) error {
 	name := strings.TrimSpace(userName)
 
@@ -65,3 +68,9 @@ func (u *User) UpdateUserName(userName string) error {
 
 	return nil
 }
+
+// アイコンの更新処理
+func (u *User) UpdateIcon(icon string){
+	u.Icon = icon
+}
+
