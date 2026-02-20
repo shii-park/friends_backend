@@ -11,6 +11,9 @@ import (
 const (
 	ResetStreakLoginDay = 1
 	LoginCutoffHour     = 4
+	InitialRankPoint    = 0
+	InitialCoin         = 0
+	InitialGachaStone   = 0
 
 	guestName       = "ゲスト"
 	guestBirthmonth = 1
@@ -65,9 +68,9 @@ func NewUser(name string, icon string, profileMessage string, birthmonth int, bi
 		LatestLoginAt: now,
 		StreakLogin:   ResetStreakLoginDay,
 
-		RankPoint:  0,
-		Coin:       0,
-		GachaStone: 0,
+		RankPoint:  InitialRankPoint,
+		Coin:       InitialCoin,
+		GachaStone: InitialGachaStone,
 	}, nil
 }
 
