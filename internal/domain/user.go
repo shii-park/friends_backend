@@ -220,6 +220,32 @@ func (u *User) addCoin(delta int) {
 	u.Coin += delta
 }
 
+// AddGachaStone ガチャ石を増やす
+func (u *User) AddGachaStone(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidGachaStoneDelta
+	}
+	u.changeGachaStone(amount)
+	return nil
+}
+
+// ConsumeGachaStone ガチャ石を減らす
+func (u *User) ConsumeGachaStone(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidGachaStoneDelta
+	}
+	if u.GachaStone < amount {
+		return errs.ErrInsufficientGachaStone
+	}
+	u.changeGachaStone(-amount)
+	return nil
+}
+
+// ガチャ石を足す
+func (u *User) changeGachaStone(delta int) {
+	u.GachaStone += delta
+}
+
 // 日付だけ取り出して4時間前にする関数
 func loginDay(t time.Time) time.Time {
 	shifted := t.Add(-LoginCutoffHour * time.Hour)
