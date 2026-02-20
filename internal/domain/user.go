@@ -78,3 +78,17 @@ func (u *User) UpdateIcon(icon string){
 func (u *User) UpdateProfileMessage(profileMessage string){
 	u.ProfileMessage = profileMessage
 }
+
+// ユーザーの更新処理
+func (u *User) UpdateUser(userName string, icon string, profileMessage string) error {
+	err := u.UpdateUserName(userName)
+
+	if err != nil {
+		return err
+	}
+
+	u.UpdateIcon(icon)
+	u.UpdateProfileMessage(profileMessage)
+
+	return nil
+}
