@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"friends_backend/internal/errs"
+	"github.com/shii-park/friends/internal/errs"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,7 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 	name := strings.TrimSpace(userName)
 
 	if name == "" {
-		return nil, errs.ErrUserNameRequired
+		return nil, errs.UserNameRequired
 	}
 
 	now := time.Now()
@@ -68,7 +68,7 @@ func (u *User) UpdateUserName(userName string) error {
 	name := strings.TrimSpace(userName)
 
 	if name == "" {
-		return errs.ErrUserNameRequired
+		return errs.UserNameRequired
 	}
 
 	if u.UserName == name {
@@ -119,11 +119,11 @@ func (u *User) OnLogin() {
 	prevDay := loginDay(prev)
 	nowDay := loginDay(now)
 
-	if prevDate.Equal(nowDate) {
+	if prevDay.Equal(nowDay) {
 		return
 	}
 
-	if prevDate.AddDate(0, 0, 1).Equal(nowDate) {
+	if prevDay.AddDate(0, 0, 1).Equal(nowDay) {
 		u.AddStreakLogin()
 	} else {
 		u.ResetStreakLogin()
