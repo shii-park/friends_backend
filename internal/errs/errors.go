@@ -4,6 +4,6 @@ import "errors"
 
 var (
     // ===== User =====
-    UserNameRequired = errors.New("userName is required")
-    UserNotFound = errors.New("user not found")
+    UserNameRequired = errors.New("ユーザーネームは必須です")
+    UserNotFound = errors.New("ユーザーが存在しません")
 )
