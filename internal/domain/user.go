@@ -17,7 +17,7 @@ const (
 
 type User struct {
 	ID             string `json:"userID"` // 更新しない
-	UserName       string `json:"userName"`
+	Name           string `json:"userName"`
 	Icon           string `json:"icon,omitempty"` // アイコン、stringにしてるが実際どうなるかはわからない
 	ProfileMessage string `json:"profileMsg,omitempty"`
 
@@ -33,10 +33,10 @@ func NewUserID() string {
 }
 
 // NewUser ユーザーを生成する関数
-func NewUser(userName string, icon string, profileMessage string, birthday time.Time) (*User, error) {
-	name := strings.TrimSpace(userName)
+func NewUser(name string, icon string, profileMessage string, birthday time.Time) (*User, error) {
+	formattedName := strings.TrimSpace(name)
 
-	if name == "" {
+	if formattedName == "" {
 		return nil, errs.UserNameRequired
 	}
 
@@ -44,7 +44,7 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 
 	return &User{
 		ID:             NewUserID(),
-		UserName:       name,
+		Name:           formattedName,
 		Icon:           icon,
 		ProfileMessage: profileMessage,
 
@@ -63,18 +63,18 @@ func NewGuestUser() *User {
 }
 
 // UpdateUserName ユーザー名の更新処理
-func (u *User) UpdateUserName(userName string) error {
-	name := strings.TrimSpace(userName)
+func (u *User) UpdateUserName(name string) error {
+	formattedName := strings.TrimSpace(name)
 
 	if name == "" {
 		return errs.UserNameRequired
 	}
 
-	if u.UserName == name {
+	if u.Name == formattedName {
 		return nil
 	}
 
-	u.UserName = name
+	u.Name = name
 
 	return nil
 }
