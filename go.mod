@@ -2,7 +2,10 @@ module github.com/shii-park/friends
 
 go 1.26.0
 
-require github.com/gin-gonic/gin v1.11.0
+require (
+	github.com/gin-gonic/gin v1.11.0
+	github.com/google/uuid v1.6.0
+)
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
