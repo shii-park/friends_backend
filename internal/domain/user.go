@@ -44,3 +44,8 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 		StreakLogin:	1,
 	}, nil
 }
+
+func NewGuestUser() (*User, error){
+	user, err := NewUser("ゲスト", "", "", time.Time{})
+	return user, err
+}
