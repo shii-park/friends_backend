@@ -50,9 +50,9 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 
 // ゲストユーザーを生成する関数
 // ここにおくべきかはちょっと微妙ではある（一応置いておく）
-func NewGuestUser() (*User, error){
-	user, err := NewUser("ゲスト", "", "", time.Time{})
-	return user, err
+func NewGuestUser() *User {
+	user, _ := NewUser("ゲスト", "", "", time.Time{})
+	return user
 }
 
 // ユーザー名の更新処理
