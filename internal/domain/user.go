@@ -1,7 +1,10 @@
 package domain
 
 import (
+	"strings"
 	"time"
+
+	"friends_backend/internal/errs"
 	"github.com/google/uuid"
 )
 
@@ -27,7 +30,7 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 	name := strings.TrimSpace(userName)
 
 	if name == "" {
-		return nil, errors.New("userName is required")
+		return nil, errs.ErrUserNameRequired
 	}
 
 	now := time.Now()
@@ -57,7 +60,7 @@ func (u *User) UpdateUserName(userName string) error {
 	name := strings.TrimSpace(userName)
 
 	if name == "" {
-		return errors.New("userName is required")
+		return errs.ErrUserNameRequired
 	}
 
 	if u.UserName == name {
