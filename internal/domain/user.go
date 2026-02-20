@@ -10,6 +10,8 @@ import (
 
 const (
 	ResetStreakLoginDay  = 1
+	LoginCutoffHour = 4
+
 	guestName = "ゲスト"
 )
 
@@ -114,8 +116,8 @@ func (u *User) OnLogin() {
 		return
 	}
 
-	prevDate := dateOnly(prev)
-	nowDate := dateOnly(now)
+	prevDay := loginDay(prev)
+	nowDay := loginDay(now)
 
 	if prevDate.Equal(nowDate) {
 		return
@@ -128,18 +130,19 @@ func (u *User) OnLogin() {
 	}
 }
 
-// 日付だけ取得するメソッド
-func dateOnly(t time.Time) time.Time {
-	y, m, d := t.Date()
-	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+// 日付だけ取り出して4時間前にする関数
+func loginDay(t time.Time) time.Time {
+	shifted := t.Add(-LoginCutoffHour * time.Hour)
+	y, m, d := shifted.Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, shifted.Location())
 }
 
-// 連続ログイン日数を増やす
+// 連続ログイン日数を増やす関数
 func (u *User) AddStreakLogin(){
 	u.StreakLogin++
 }
 
-// 連続ログイン日数のリセットする処理
+// 連続ログイン日数のリセットする関数
 func (u *User) ResetStreakLogin(){
 	u.StreakLogin = ResetStreakLoginDay
 }
