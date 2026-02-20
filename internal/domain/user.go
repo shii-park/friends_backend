@@ -74,3 +74,7 @@ func (u *User) UpdateIcon(icon string){
 	u.Icon = icon
 }
 
+// メッセージの更新処理
+func (u *User) UpdateProfileMessage(profileMessage string){
+	u.ProfileMessage = profileMessage
+}
