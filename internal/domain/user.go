@@ -4,23 +4,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shii-park/friends/internal/errs"
 	"github.com/google/uuid"
+	"github.com/shii-park/friends/internal/errs"
 )
 
 const (
-	ResetStreakLoginDay  = 1
-	LoginCutoffHour = 4
+	ResetStreakLoginDay = 1
+	LoginCutoffHour     = 4
 
 	guestName = "ゲスト"
 )
 
-
 type User struct {
-	ID             string    `json:"userID"` // 更新しない
-	UserName       string    `json:"userName"`
-	Icon           string    `json:"icon,omitempty"`// アイコン、stringにしてるが実際どうなるかはわからない
-	ProfileMessage string    `json:"profileMsg,omitempty"`
+	ID             string `json:"userID"` // 更新しない
+	UserName       string `json:"userName"`
+	Icon           string `json:"icon,omitempty"` // アイコン、stringにしてるが実際どうなるかはわからない
+	ProfileMessage string `json:"profileMsg,omitempty"`
 
 	Birthday      time.Time `json:"birthday"` // 更新しない
 	RegisteredAt  time.Time `json:"registeredDate"`
@@ -28,13 +27,13 @@ type User struct {
 	StreakLogin   int       `json:"streakLogin"`
 }
 
-// ユーザーIDを生成する関数
+// NewUserID ユーザーIDを生成する関数
 func NewUserID() string {
 	return uuid.NewString()
 }
 
-// ユーザーを生成する関数
-func NewUser(userName string, icon string, profileMessage string, birthday time.Time)  (*User, error) {
+// NewUser ユーザーを生成する関数
+func NewUser(userName string, icon string, profileMessage string, birthday time.Time) (*User, error) {
 	name := strings.TrimSpace(userName)
 
 	if name == "" {
@@ -44,26 +43,26 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 	now := time.Now()
 
 	return &User{
-		ID:				NewUserID(),
-		UserName:		name,
-		Icon:			icon,
-		ProfileMessage:	profileMessage,
+		ID:             NewUserID(),
+		UserName:       name,
+		Icon:           icon,
+		ProfileMessage: profileMessage,
 
-		Birthday:		birthday,
-		RegisteredAt:	now,
-		LatestLoginAt:	now,
-		StreakLogin:	1,
+		Birthday:      birthday,
+		RegisteredAt:  now,
+		LatestLoginAt: now,
+		StreakLogin:   1,
 	}, nil
 }
 
-// ゲストユーザーを生成する関数
+// NewGuestUser ゲストユーザーを生成する関数
 // ここにおくべきかはちょっと微妙ではある（一応置いておく）
 func NewGuestUser() *User {
 	user, _ := NewUser(guestName, "", "", time.Time{})
 	return user
 }
 
-// ユーザー名の更新処理
+// UpdateUserName ユーザー名の更新処理
 func (u *User) UpdateUserName(userName string) error {
 	name := strings.TrimSpace(userName)
 
@@ -80,20 +79,19 @@ func (u *User) UpdateUserName(userName string) error {
 	return nil
 }
 
-// アイコンの更新処理
-func (u *User) UpdateIcon(icon string){
+// UpdateIcon アイコンの更新処理
+func (u *User) UpdateIcon(icon string) {
 	u.Icon = icon
 }
 
-// メッセージの更新処理
-func (u *User) UpdateProfileMessage(profileMessage string){
+// UpdateProfileMessage メッセージの更新処理
+func (u *User) UpdateProfileMessage(profileMessage string) {
 	u.ProfileMessage = profileMessage
 }
 
-// ユーザーの更新処理
+// UpdateUser ユーザーの更新処理
 func (u *User) UpdateUser(userName string, icon string, profileMessage string) error {
 	err := u.UpdateUserName(userName)
-
 	if err != nil {
 		return err
 	}
@@ -104,7 +102,7 @@ func (u *User) UpdateUser(userName string, icon string, profileMessage string) e
 	return nil
 }
 
-// ログイン処理
+// OnLogin ログイン処理
 func (u *User) OnLogin() {
 	prev := u.LatestLoginAt
 
@@ -137,12 +135,12 @@ func loginDay(t time.Time) time.Time {
 	return time.Date(y, m, d, 0, 0, 0, 0, shifted.Location())
 }
 
-// 連続ログイン日数を増やす関数
-func (u *User) AddStreakLogin(){
+// AddStreakLogin 連続ログイン日数を増やす関数
+func (u *User) AddStreakLogin() {
 	u.StreakLogin++
 }
 
-// 連続ログイン日数のリセットする関数
-func (u *User) ResetStreakLogin(){
+// ResetStreakLogin 連続ログイン日数のリセットする関数
+func (u *User) ResetStreakLogin() {
 	u.StreakLogin = ResetStreakLoginDay
 }
