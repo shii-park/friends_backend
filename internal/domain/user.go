@@ -17,8 +17,30 @@ type User struct {
 	StreakLogin   int       `json:"streakLogin"`
 }
 
-func NewUserID() UserID {
+// ユーザーIDを生成するメソッド
+func NewUserID() {
 	return uuid.NewString()
 }
 
+// ユーザーを生成するメソッド
+func NewUser(userName string, icon string, profileMessage string, birthday time.Time)  (*User, error) {
+	name := strings.TrimSpace(userName)
 
+	if name == "" {
+		return nil, errors.New("userName is required")
+	}
+
+	now := time.Now()
+
+	return &User{
+		ID:				NewUserID(),
+		UserName:		userName,
+		Icon:			icon,
+		ProfileMessage:	profileMessage,
+
+		Birthday:		birthday,
+		RegisteredAt:	now,
+		LatestLoginAt:	now,
+		StreakLogin:	1,
+	}, nil
+}
