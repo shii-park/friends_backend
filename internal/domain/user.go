@@ -21,7 +21,7 @@ type User struct {
 }
 
 // ユーザーIDを生成する関数
-func NewUserID() {
+func NewUserID() string {
 	return uuid.NewString()
 }
 
