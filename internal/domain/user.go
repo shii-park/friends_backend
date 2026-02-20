@@ -157,6 +157,38 @@ func (u *User) ResetStreakLogin() {
 	u.StreakLogin = ResetStreakLoginDay
 }
 
+// AddRankPoint ランクポイントを増やす
+func (u *User) AddRankPoint(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidRankPointDelta
+	}
+
+	u.addRankPoint(amount)
+
+	return nil
+}
+
+// ConsumeRankPoint ランクポイントを減らす
+func (u *User) ConsumeRankPoint(amount int) error {
+	if amount <= 0 {
+		return errs.ErrInvalidRankPointDelta
+	}
+
+	if u.RankPoint < amount {
+		u.RankPoint = 0
+		return nil
+	}
+
+	u.addRankPoint(-amount)
+
+	return nil
+}
+
+// ランクポイントの値を足す
+func (u *User) addRankPoint(delta int) {
+	u.RankPoint += delta
+}
+
 // 日付だけ取り出して4時間前にする関数
 func loginDay(t time.Time) time.Time {
 	shifted := t.Add(-LoginCutoffHour * time.Hour)
