@@ -8,6 +8,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	ResetStreakLoginDay  = 1
+	guestName = "ゲスト"
+)
+
+
 type User struct {
 	ID             string    `json:"userID"` // 更新しない
 	UserName       string    `json:"userName"`
@@ -51,7 +57,7 @@ func NewUser(userName string, icon string, profileMessage string, birthday time.
 // ゲストユーザーを生成する関数
 // ここにおくべきかはちょっと微妙ではある（一応置いておく）
 func NewGuestUser() *User {
-	user, _ := NewUser("ゲスト", "", "", time.Time{})
+	user, _ := NewUser(guestName, "", "", time.Time{})
 	return user
 }
 
@@ -100,10 +106,11 @@ func (u *User) UpdateUser(userName string, icon string, profileMessage string) e
 func (u *User) OnLogin() {
 	prev := u.LatestLoginAt
 
-	u.LatestLoginAt = time.Now()
+	now := time.Now()
+	u.LatestLoginAt = now
 
 	if prev.IsZero() {
-		u.StreakLogin = 1
+		u.ResetStreakLogin()
 		return
 	}
 
@@ -115,9 +122,9 @@ func (u *User) OnLogin() {
 	}
 
 	if prevDate.AddDate(0, 0, 1).Equal(nowDate) {
-		u.StreakLogin++
+		u.AddStreakLogin()
 	} else {
-		u.StreakLogin = 1
+		u.ResetStreakLogin()
 	}
 }
 
@@ -125,4 +132,14 @@ func (u *User) OnLogin() {
 func dateOnly(t time.Time) time.Time {
 	y, m, d := t.Date()
 	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+}
+
+// 連続ログイン日数を増やす
+func (u *User) AddStreakLogin(){
+	u.StreakLogin++
+}
+
+// 連続ログイン日数のリセットする処理
+func (u *User) ResetStreakLogin(){
+	u.StreakLogin = ResetStreakLoginDay
 }
