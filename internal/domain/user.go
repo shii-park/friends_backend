@@ -15,7 +15,7 @@ type User struct {
 	ProfileMessage string    `json:"profileMsg,omitempty"`
 
 	Birthday      time.Time `json:"birthday"` // 更新しない
-	RegisteredAt  time.Time `json:"registerdDate"`
+	RegisteredAt  time.Time `json:"registeredDate"`
 	LatestLoginAt time.Time `json:"latestLoginDate"`
 	StreakLogin   int       `json:"streakLogin"`
 }
