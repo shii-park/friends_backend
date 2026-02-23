@@ -27,13 +27,6 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	//日付の検証(未来の日付であればここでエラー)
-	// now := time.Now()
-	// if json.Birthday.After(now) {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "誕生日が正しくありません"})
-	// 	return
-	// }
-
 	user, err := domain.NewUser(json.Username, json.Icon, json.ProfileMessage, json.Birthmonth, json.Birthday)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
