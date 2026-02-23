@@ -9,7 +9,8 @@ import (
 	"github.com/shii-park/friends/internal/domain"
 )
 
-// RegisterHandler はユーザー新規登録を処理するハンドラーです。
+// RegisterHandler はユーザー新規登録を処理するハンドラーです
+// ユーザー情報をデータベースに保存し，セッションを保存します．
 func RegisterHandler(c *gin.Context) {
 	var json struct {
 		Username       string    `json:"userName" binding:"required"`
