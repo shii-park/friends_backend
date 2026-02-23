@@ -18,6 +18,9 @@ func RegisterHandler(c *gin.Context) {
 		Birthday       time.Time `json:"birthday" binding:"required"`
 	}
 
+	//TODO: DB保存処理が完成したら下のコメントアウトを解除
+	// session := sessions.Default(c)
+
 	if err := c.ShouldBindBodyWithJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -39,6 +42,9 @@ func RegisterHandler(c *gin.Context) {
 	//TODO: ユーザー情報をDBに保存する処理を追加
 	//TODO: 下のPrintlnを削除(未使用の変数があるとエラーが出るので置いています)
 	fmt.Println(user)
+
+	//TODO: セッション保存処理を追加
+	// session.Set("userID",user.ID)
 
 	//TODO: フロントへのレスポンスは話し合って調整する
 	c.JSON(http.StatusOK, gin.H{"message": "ユーザ登録が完了しました"})
