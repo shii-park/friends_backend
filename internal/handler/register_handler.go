@@ -25,9 +25,10 @@ func RegisterHandler(c *gin.Context) {
 	user, err := domain.NewUser(json.Username, json.Icon, json.ProfileMessage, json.Birthday)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	//TODO: ユーザ情報をDBに保存する処理を追加
+	//TODO: ユーザー情報をDBに保存する処理を追加
 	//TODO: 下のPrintlnを削除(未使用の変数があるとエラーが出るので置いています)
 	fmt.Println(user)
 
