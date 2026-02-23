@@ -12,9 +12,9 @@ import (
 // RegisterHandler はユーザー新規登録を処理するハンドラーです。
 func RegisterHandler(c *gin.Context) {
 	var json struct {
-		Username       string    `json:"Username" binding:"required"`
-		Icon           string    `json:"icon.omitempty"`
-		ProfileMessage string    `json:"profileMsg.omitempty"`
+		Username       string    `json:"userName" binding:"required"`
+		Icon           string    `json:"icon,omitempty"`
+		ProfileMessage string    `json:"profileMsg,omitempty"`
 		Birthday       time.Time `json:"birthday"`
 	}
 
