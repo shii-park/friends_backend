@@ -15,7 +15,7 @@ func RegisterHandler(c *gin.Context) {
 		Username       string `json:"userName" binding:"required"`
 		Icon           string `json:"icon,omitempty"`
 		ProfileMessage string `json:"profileMsg,omitempty"`
-		Birthmonth     int    `json:"bitrhmonth" binding:"required"`
+		Birthmonth     int    `json:"birthmonth" binding:"required"`
 		Birthday       int    `json:"birthday" binding:"required"`
 	}
 
