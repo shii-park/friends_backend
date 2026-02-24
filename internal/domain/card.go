@@ -8,8 +8,6 @@ import (
 	"github.com/shii-park/friends/internal/errs"
 )
 
-type CardID string
-
 func NewCardID() string {
 	return uuid.NewString()
 }
