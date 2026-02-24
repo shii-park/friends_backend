@@ -16,6 +16,7 @@ func AuthRequired() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "認証が必要です"})
 			return
 		}
+		c.Set("userID", userID)
 		c.Next()
 	}
 }
