@@ -16,4 +16,5 @@ var (
 	// ===== Card =====
 	ErrCardNameRequired  = errors.New("カード名は必須です")
 	ErrInvalidCardRarity = errors.New("無効なカードのレア度です")
+	ErrInvalidCardType   = errors.New("無効なカードの種類です")
 )

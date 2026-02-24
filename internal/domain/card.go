@@ -14,6 +14,7 @@ func NewCardID() string {
 
 const (
 	InitialLevel = 0
+	MaxLevel     = 10
 )
 
 type Rarity string
