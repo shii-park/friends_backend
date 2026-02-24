@@ -37,7 +37,7 @@ func (r Rarity) IsValid() bool {
 	}
 }
 
-type Card struct {
+type BaseCard struct {
 	ID string `json:"cardID"`
 
 	Name string `json:"cardName"`
@@ -49,7 +49,7 @@ type Card struct {
 	Level        int       `json:"level"`
 }
 
-func NewCard(id string, name string, icon string, rarity Rarity) (*Card, error) {
+func NewCard(id string, name string, icon string, rarity Rarity) (*BaseCard, error) {
 	formattedName := strings.TrimSpace(name)
 	if formattedName == "" {
 		return nil, errs.ErrCardNameRequired
@@ -63,7 +63,7 @@ func NewCard(id string, name string, icon string, rarity Rarity) (*Card, error) 
 		id = NewCardID()
 	}
 
-	return &Card{
+	return &BaseCard{
 		ID:           id,
 		Name:         formattedName,
 		Icon:         icon,
