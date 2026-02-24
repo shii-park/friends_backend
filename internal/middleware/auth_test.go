@@ -25,7 +25,10 @@ func setupRouter(userID any) *gin.Engine {
 		session := sessions.Default(c)
 		if userID != nil {
 			session.Set("userID", userID)
-			session.Save()
+			err := session.Save()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			}
 		}
 		c.Status(http.StatusOK)
 	})
@@ -42,13 +45,19 @@ func TestAuthRequired_正常系(t *testing.T) {
 
 	// セッションCookieを取得
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/set-session", nil)
+	req, err := http.NewRequest("GET", "/set-session", nil)
+	if err != nil {
+		t.Logf("正常系テストの1つ目のhttpリクエストの作成失敗: %v", err)
+	}
 	r.ServeHTTP(w, req)
 	cookie := w.Result().Header.Get("Set-Cookie")
 
 	// 保護されたエンドポイントにCookieつきでアクセス
 	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("GET", "/protected", nil)
+	req2, err := http.NewRequest("GET", "/protected", nil)
+	if err != nil {
+		t.Logf("正常系テストの2つ目のhttpリクエストの作成失敗: %v", err)
+	}
 	req2.Header.Set("Cookie", cookie)
 	r.ServeHTTP(w2, req2)
 
@@ -59,7 +68,10 @@ func TestAuthRequired_セッション情報なし(t *testing.T) {
 	r := setupRouter(nil)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/protected", nil)
+	req, err := http.NewRequest("GET", "/protected", nil)
+	if err != nil {
+		t.Logf("セッション情報なしテストのhttpリクエストの作成失敗: %v", err)
+	}
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
