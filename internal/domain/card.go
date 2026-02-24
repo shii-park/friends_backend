@@ -59,7 +59,7 @@ func NewCard(id string, name string, icon string, rarity Rarity) (*Card, error) 
 	}
 
 	if strings.TrimSpace(id) == "" {
-		id = string(NewCardID()) // CardID型ならstring変換
+		id = NewCardID()
 	}
 
 	return &Card{
