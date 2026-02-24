@@ -85,7 +85,7 @@ func NewGuestUser() *User {
 func (u *User) UpdateUserName(name string) error {
 	formattedName := strings.TrimSpace(name)
 
-	if name == "" {
+	if formattedName == "" {
 		return errs.ErrUserNameRequired
 	}
 
@@ -93,8 +93,7 @@ func (u *User) UpdateUserName(name string) error {
 		return nil
 	}
 
-	u.Name = name
-
+	u.Name = formattedName
 	return nil
 }
 
