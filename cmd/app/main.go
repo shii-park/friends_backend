@@ -50,13 +50,39 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 
+	// 認証なしエンドポイント
+	// 新規登録
 	r.POST("/register", handler.RegisterHandler)
 
-	//保護されたエンドポイントの動作検証(後々削除)
-	r.GET("/ping", middleware.AuthRequired(), func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
+	// 認証が必要なエンドポイント
+	auth := r.Group("/")
+	auth.Use(middleware.AuthRequired())
+	{
+		// TODO:以下は動作検証用エンドポイントなので後で削除
+		auth.GET("/ping", testHandler)
+		// バトルスタート
+		auth.POST("/battle", testHandler)
+		// ガチャのラインナップを取得
+		auth.GET("/gacha/lineup", testHandler)
+		// ガチャを引く
+		auth.POST("/gacha/draw", testHandler)
+		// ストレージの内容を取得
+		auth.GET("/storage", testHandler)
+		// ユーザー情報を取得
+		auth.GET("/user/:userID/get", testHandler)
+		// ユーザー情報を削除
+		auth.DELETE("/user/:userID/delete", testHandler)
+		// ユーザー名を更新
+		auth.PUT("/user/:userID/update", testHandler)
+		// カードを強化する
+		auth.POST("/card/:cardID/upgrade", testHandler)
+	}
 
 	//ポート8080番でリッスン
 	r.Run()
+}
+
+// TODO: すべてのハンドラーが完成したら以下を削除
+func testHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
