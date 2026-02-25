@@ -41,6 +41,6 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 		}
 
 		//TODO: フロントへのレスポンスは話し合って調整する
-		c.JSON(http.StatusOK, gin.H{"message": "ユーザ登録が完了しました"})
+		c.JSON(http.StatusOK, gin.H{"message": "ユーザー登録が完了しました"})
 	}
 }
