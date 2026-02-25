@@ -79,7 +79,6 @@ func main() {
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
-		auth.PUT("/user/:userID/update", testHandler)
 		auth.POST("/card/:instanceID/enhacement", enhHandler.Enhance)
 		auth.POST("/matching", testHandler)
 	}
