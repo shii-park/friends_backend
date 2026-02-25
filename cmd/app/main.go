@@ -61,7 +61,8 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 
 	// 認証なしエンドポイント
-	r.POST("/register", handler.RegisterHandler)
+	// 新規登録
+	r.POST("/register", handler.RegisterHandler(queries))
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
