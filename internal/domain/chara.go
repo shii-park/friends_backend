@@ -119,3 +119,71 @@ func NewCharacter(
 		SpecialType: specialType,
 	}, nil
 }
+
+func (c *Character) AddHP(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidCharacterHPDelta
+	}
+	c.HP += delta
+	if c.HP > c.MaxHP {
+		c.HP = c.MaxHP
+	}
+	return nil
+}
+
+func (c *Character) AddATK(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidCharacterATKDelta
+	}
+	c.ATK += delta
+	if c.ATK > c.MaxATK {
+		c.ATK = c.MaxATK
+	}
+	return nil
+}
+
+func (c *Character) AddTECH(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidCharacterTECHDelta
+	}
+	c.TECH += delta
+	if c.TECH > c.MaxTECH {
+		c.TECH = c.MaxTECH
+	}
+	return nil
+}
+
+func (c *Character) LevelUp() error {
+	if c.Level >= MaxLevel {
+		return errs.ErrCharacterAlreadyMaxLevel
+	}
+	return c.SetLevel(c.Level + 1)
+}
+
+func (c *Character) SetLevel(level int) error {
+	if level < 1 || level > MaxLevel {
+		return errs.ErrInvalidCharacterLevel
+	}
+
+	c.Level = level
+
+	c.HP = calcLinearStat(c.InitHP, c.MaxHP, level)
+	c.ATK = calcLinearStat(c.InitATK, c.MaxATK, level)
+	c.TECH = calcLinearStat(c.InitTECH, c.MaxTECH, level)
+
+	return nil
+}
+
+func calcLinearStat(init int, max int, level int) int {
+	// Lv1はinit、LvMaxは必ずmaxにする
+	if level <= 1 {
+		return init
+	}
+	if level >= MaxLevel {
+		return max
+	}
+
+	denom := MaxLevel - 1
+	step := (max - init) / denom
+	return init + step*(level-1)
+}

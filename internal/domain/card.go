@@ -13,7 +13,7 @@ func NewCardID() string {
 }
 
 const (
-	InitialLevel = 0
+	InitialLevel = 1
 	MaxLevel     = 10
 )
 
