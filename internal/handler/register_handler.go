@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/shii-park/friends/internal/errs"
 	"github.com/shii-park/friends/internal/service"
 )
 
@@ -28,7 +30,11 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 		//DBにユーザーデータを保存
 		user, err := svc.RegisterUser(c.Request.Context(), json.Username, json.Icon, json.ProfileMessage, json.Birthmonth, json.Birthday)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			if errors.Is(err, errs.ErrUserNameRequired) || errors.Is(err, errs.ErrInvalidBirthday) {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
+			}
 			return
 		}
 
