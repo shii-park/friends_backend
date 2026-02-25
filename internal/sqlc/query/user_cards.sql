@@ -11,3 +11,11 @@ SELECT instance_id, card_id
 FROM user_cards
 WHERE user_id = $1
 ORDER BY acquired_date DESC;
+
+ALTER TABLE user_cards
+ADD COLUMN level INT NOT NULL DEFAULT 1;
+
+-- name: IncreaseUserCardLevel :execrows
+UPDATE user_cards
+SET level = level + 1
+WHERE user_id = $1 AND instance_id = $2 AND level < $3;
