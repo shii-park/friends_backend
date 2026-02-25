@@ -13,10 +13,7 @@ import (
 	"github.com/shii-park/friends/internal/db"
 	"github.com/shii-park/friends/internal/handler"
 	"github.com/shii-park/friends/internal/middleware"
-<<<<<<< HEAD
 	"github.com/shii-park/friends/internal/repository"
-=======
->>>>>>> 11b1113 (#20 Change: mainでRegisterService生成，RegisterHandler()のDB保存処理をRegisterUser()に分割)
 	"github.com/shii-park/friends/internal/service"
 	"github.com/shii-park/friends/internal/sqlc"
 )
@@ -46,8 +43,9 @@ func main() {
 
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
-<<<<<<< HEAD
 
+	// serviceセットアップ
+	registerSvc := service.NewRegisterService(queries)
 	// Storage
 	storageRepo := repository.NewStorageRepository(queries)
 	storageSvc := service.NewStorageService(storageRepo)
@@ -57,13 +55,6 @@ func main() {
 	enhRepo := repository.NewEnhancementRepository(dbConn, queries)
 	enhSvc := service.NewEnhancementService(enhRepo)
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
-	// serviceセットアップ
-	registerSvc := service.NewRegisterService(queries)
-=======
->>>>>>> 4c86817 (#20 Add: RegisterHandler()にユーザーをDBに追加する処理とセッションを保存する処理を追加)
-
-	// serviceセットアップ
-	registerSvc := service.NewRegisterService(queries)
 
 	r := gin.Default()
 
@@ -73,16 +64,7 @@ func main() {
 
 	// 認証なしエンドポイント
 	// 新規登録
-<<<<<<< HEAD
-<<<<<<< HEAD
 	r.POST("/register", handler.RegisterHandler(registerSvc))
-=======
-	r.POST("/register", handler.RegisterHandler(queries))
->>>>>>> 4c86817 (#20 Add: RegisterHandler()にユーザーをDBに追加する処理とセッションを保存する処理を追加)
-=======
-	r.POST("/register", handler.RegisterHandler(registerSvc))
->>>>>>> 11b1113 (#20 Change: mainでRegisterService生成，RegisterHandler()のDB保存処理をRegisterUser()に分割)
-
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
 	auth.Use(middleware.AuthRequired())
@@ -99,6 +81,8 @@ func main() {
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
+
+		auth.PUT("/user/:userID/update", testHandler)
 		auth.POST("/card/:instanceID/enhacement", enhHandler.Enhance)
 		auth.POST("/matching", testHandler)
 	}
