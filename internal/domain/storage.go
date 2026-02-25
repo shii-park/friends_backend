@@ -5,34 +5,30 @@ import (
 )
 
 // 型定義
-type (
-	UserID string
-	CardID string
-)
 
 // Storage はユーザーの所持カード一覧
 // instanceの概念は無く、card_id の集合として管理する
 type Storage struct {
-	UserID UserID
+	UserID string
 
 	// 所持カード
-	cards map[CardID]struct{}
+	cards map[string]struct{}
 }
 
 // NewEmptyStorage 新規作成（空）
-func NewEmptyStorage(userID UserID) *Storage {
+func NewEmptyStorage(userID string) *Storage {
 	return &Storage{
 		UserID: userID,
-		cards:  make(map[CardID]struct{}),
+		cards:  make(map[string]struct{}),
 	}
 }
 
 // ReconstructStorage DBから復元
 func ReconstructStorage(
-	userID UserID,
-	cardIDs []CardID,
+	userID string,
+	cardIDs []string,
 ) *Storage {
-	m := make(map[CardID]struct{}, len(cardIDs))
+	m := make(map[string]struct{}, len(cardIDs))
 
 	for _, id := range cardIDs {
 		m[id] = struct{}{}
@@ -46,7 +42,7 @@ func ReconstructStorage(
 
 // Add Card追加
 // 既に持っていたらエラー
-func (s *Storage) Add(cardID CardID) error {
+func (s *Storage) Add(cardID string) error {
 	if s == nil {
 		return errs.ErrStorageNil
 	}
@@ -65,7 +61,7 @@ func (s *Storage) Add(cardID CardID) error {
 }
 
 // Remove Card削除
-func (s *Storage) Remove(cardID CardID) error {
+func (s *Storage) Remove(cardID string) error {
 	if s == nil {
 		return errs.ErrStorageNil
 	}
@@ -80,7 +76,7 @@ func (s *Storage) Remove(cardID CardID) error {
 }
 
 // Has 所持確認
-func (s *Storage) Has(cardID CardID) bool {
+func (s *Storage) Has(cardID string) bool {
 	if s == nil {
 		return false
 	}
@@ -91,12 +87,12 @@ func (s *Storage) Has(cardID CardID) bool {
 }
 
 // List 一覧取得
-func (s *Storage) List() []CardID {
+func (s *Storage) List() []string {
 	if s == nil {
 		return nil
 	}
 
-	result := make([]CardID, 0, len(s.cards))
+	result := make([]string, 0, len(s.cards))
 
 	for id := range s.cards {
 		result = append(result, id)
