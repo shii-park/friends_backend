@@ -21,7 +21,7 @@ type Card struct {
 
 type Character struct {
 	CharacterID uuid.UUID
-	CardID      uuid.UUID
+	CardID      int32
 	Hp          int32
 	Atk         int32
 	Tech        int32
@@ -36,7 +36,7 @@ type Character struct {
 
 type Equipment struct {
 	EquipmentID   uuid.UUID
-	CardID        uuid.UUID
+	CardID        int32
 	BonusHp       int32
 	BonusAtk      int32
 	BonusTech     int32
@@ -50,7 +50,7 @@ type Equipment struct {
 }
 
 type User struct {
-	UserID          string
+	UserID          uuid.UUID
 	UserName        string
 	IconUrl         sql.NullString
 	ProfileMessage  sql.NullString

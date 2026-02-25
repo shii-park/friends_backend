@@ -8,6 +8,8 @@ package sqlc
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -19,7 +21,7 @@ INSERT INTO users (
 `
 
 type CreateUserParams struct {
-	UserID          string
+	UserID          uuid.UUID
 	UserName        string
 	IconUrl         sql.NullString
 	ProfileMessage  sql.NullString
@@ -48,7 +50,7 @@ DELETE FROM users
 WHERE user_id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
+func (q *Queries) DeleteUser(ctx context.Context, userID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, userID)
 	return err
 }
@@ -60,7 +62,7 @@ WHERE user_id = $1 LIMIT 1
 `
 
 // User系
-func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, userID uuid.UUID) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, userID)
 	var i User
 	err := row.Scan(
@@ -88,7 +90,7 @@ WHERE user_id = $2
 
 type UpdateUserCoinParams struct {
 	Coin   int32
-	UserID string
+	UserID uuid.UUID
 }
 
 func (q *Queries) UpdateUserCoin(ctx context.Context, arg UpdateUserCoinParams) error {
@@ -104,7 +106,7 @@ WHERE user_id = $2
 
 type UpdateUserGachaStoneParams struct {
 	GachaStone int32
-	UserID     string
+	UserID     uuid.UUID
 }
 
 func (q *Queries) UpdateUserGachaStone(ctx context.Context, arg UpdateUserGachaStoneParams) error {
@@ -120,7 +122,7 @@ WHERE user_id = $2
 
 type UpdateUserRankPointParams struct {
 	RankPoint int32
-	UserID    string
+	UserID    uuid.UUID
 }
 
 func (q *Queries) UpdateUserRankPoint(ctx context.Context, arg UpdateUserRankPointParams) error {
