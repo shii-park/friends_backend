@@ -27,7 +27,7 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 			return
 		}
 
-		//DBにユーザーデータを保存
+		// DBにユーザーデータを保存
 		user, err := svc.RegisterUser(c.Request.Context(), json.Username, json.Icon, json.ProfileMessage, json.Birthmonth, json.Birthday)
 		if err != nil {
 			if errors.Is(err, errs.ErrUserNameRequired) || errors.Is(err, errs.ErrInvalidBirthday) {
