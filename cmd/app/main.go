@@ -91,6 +91,7 @@ func main() {
 		auth.GET("/storage", storageHandler.ListCards)
 		auth.POST("/storage/cards", storageHandler.AddCard)
 		auth.DELETE("/storage/cards/:instanceID", storageHandler.RemoveCard)
+		auth.GET("/storage/detail", storageHandler.ListCardDetails)
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)

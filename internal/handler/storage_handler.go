@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/errs"
@@ -144,4 +145,28 @@ func writeGinDomainError(c *gin.Context, err error) {
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+}
+
+func (h *StorageGinHandler) ListCardDetails(c *gin.Context) {
+	sess := sessions.Default(c)
+	raw := sess.Get("userID")
+	userIDStr, _ := raw.(string)
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "認証が必要です"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid session userID"})
+		return
+	}
+
+	res, err := h.svc.ListCardDetails(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
