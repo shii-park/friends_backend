@@ -43,6 +43,7 @@ func main() {
 
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
+<<<<<<< HEAD
 
 	// Storage
 	storageRepo := repository.NewStorageRepository(queries)
@@ -55,6 +56,8 @@ func main() {
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 	// serviceセットアップ
 	registerSvc := service.NewRegisterService(queries)
+=======
+>>>>>>> 4c86817 (#20 Add: RegisterHandler()にユーザーをDBに追加する処理とセッションを保存する処理を追加)
 
 	r := gin.Default()
 
@@ -64,7 +67,11 @@ func main() {
 
 	// 認証なしエンドポイント
 	// 新規登録
+<<<<<<< HEAD
 	r.POST("/register", handler.RegisterHandler(registerSvc))
+=======
+	r.POST("/register", handler.RegisterHandler(queries))
+>>>>>>> 4c86817 (#20 Add: RegisterHandler()にユーザーをDBに追加する処理とセッションを保存する処理を追加)
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
