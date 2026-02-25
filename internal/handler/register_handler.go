@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/shii-park/friends/internal/domain"
 )
@@ -19,8 +20,7 @@ func RegisterHandler(c *gin.Context) {
 		Birthday       int    `json:"birthday" binding:"required"`
 	}
 
-	//TODO: DB保存処理が完成したら下のコメントアウトを解除
-	// session := sessions.Default(c)
+	session := sessions.Default(c)
 
 	if err := c.ShouldBindBodyWithJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
