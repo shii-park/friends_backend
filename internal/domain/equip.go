@@ -134,7 +134,6 @@ func (e *Equip) AddBonusTECH(delta int) error {
 	return nil
 }
 
-// レベルアップ
 func (e *Equip) LevelUp() error {
 	if e.Level >= MaxLevel {
 		return errs.ErrEquipAlreadyMaxLevel
