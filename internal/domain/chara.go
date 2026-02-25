@@ -9,15 +9,15 @@ import (
 type SpecialType string
 
 const (
-	SpecialTypeUnknown SpecialType = ""
-	SpecialTypeGu      SpecialType = "gu"
-	SpecialTypeChoki   SpecialType = "choki"
-	SpecialTypePa      SpecialType = "pa"
+	SpecialTypeUnknown  SpecialType = ""
+	SpecialTypeRock     SpecialType = "rock"
+	SpecialTypeScissors SpecialType = "scissors"
+	SpecialTypePaper    SpecialType = "paper"
 )
 
 func (s SpecialType) IsValid() bool {
 	switch s {
-	case SpecialTypeGu, SpecialTypeChoki, SpecialTypePa:
+	case SpecialTypeRock, SpecialTypeScissors, SpecialTypePaper:
 		return true
 	default:
 		return false

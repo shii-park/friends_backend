@@ -8,7 +8,6 @@ const (
 	Paper    AttackType = "paper"
 )
 
-// TODO: SpecialTypeを実装
 func JudgeJanken(player, oppo AttackType) JankenResult {
 	if player == oppo {
 		return Draw
