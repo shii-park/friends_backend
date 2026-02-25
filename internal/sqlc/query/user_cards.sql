@@ -2,7 +2,7 @@
 INSERT INTO user_cards (instance_id, user_id, card_id)
 VALUES ($1, $2, $3);
 
--- name: RemoveUserCard :exec
+-- name: RemoveUserCard :execrows
 DELETE FROM user_cards
 WHERE user_id = $1 AND instance_id = $2;
 

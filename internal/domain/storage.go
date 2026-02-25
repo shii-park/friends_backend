@@ -13,14 +13,13 @@ type CardInstance struct {
 
 // Storage ユーザーの所持カード一覧
 type Storage struct {
-	UserID string
+	UserID uuid.UUID
 
-	// instanceID → CardInstance
 	cards map[uuid.UUID]CardInstance
 }
 
 // NewEmptyStorage 新規作成（空）
-func NewEmptyStorage(userID string) *Storage {
+func NewEmptyStorage(userID uuid.UUID) *Storage {
 	return &Storage{
 		UserID: userID,
 		cards:  make(map[uuid.UUID]CardInstance),
@@ -28,7 +27,7 @@ func NewEmptyStorage(userID string) *Storage {
 }
 
 // ReconstructStorage DBから復元
-func ReconstructStorage(userID string, cardInstances []CardInstance) *Storage {
+func ReconstructStorage(userID uuid.UUID, cardInstances []CardInstance) *Storage {
 	m := make(map[uuid.UUID]CardInstance, len(cardInstances))
 	for _, ci := range cardInstances {
 		m[ci.InstanceID] = ci
