@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/domain"
 	"github.com/shii-park/friends/internal/sqlc"
 )
@@ -23,8 +24,13 @@ func (s *RegisterService) RegisterUser(ctx context.Context, name string, icon st
 		return nil, err
 	}
 
+	userID, err := uuid.Parse(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	err = s.queries.CreateUser(ctx, sqlc.CreateUserParams{
-		UserID:   user.ID,
+		UserID:   userID,
 		UserName: user.Name,
 		IconUrl: sql.NullString{
 			String: user.Icon,
@@ -42,11 +48,15 @@ func (s *RegisterService) RegisterUser(ctx context.Context, name string, icon st
 			Int16: int16(user.Birthday),
 			Valid: true,
 		},
+		RegisteredDate: user.RegisteredAt,
 		LatestLoginDate: sql.NullTime{
 			Time:  user.LatestLoginAt,
 			Valid: true,
 		},
 		StreakLoginDays: int32(user.StreakLogin),
+		RankPoint:       int32(user.RankPoint),
+		Coin:            int32(user.Coin),
+		GachaStone:      int32(user.GachaStone),
 	})
 	if err != nil {
 		return nil, err
