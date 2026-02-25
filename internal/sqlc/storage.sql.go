@@ -12,20 +12,18 @@ import (
 	"github.com/google/uuid"
 )
 
-const listUserCardDetails = `-- name: ListUserCardDetails :many
+const getUserCardDetail = `-- name: GetUserCardDetail :one
 SELECT
   uc.instance_id,
+  uc.card_id,
+  uc.level,
 
-  c.card_id         AS card_id,
-  c.card_name       AS card_name,
-  c.card_kind       AS card_kind,
-  c.rarity          AS rarity,
-  c.card_icon_url   AS card_icon_url,
+  c.card_name,
+  c.card_kind,
+  c.rarity,
+  c.card_icon_url,
 
-  ch.character_id   AS character_id,
-  ch.hp             AS ch_hp,
-  ch.atk            AS ch_atk,
-  ch.tech           AS ch_tech,
+  ch.character_id,
   ch.init_hp        AS ch_init_hp,
   ch.init_atk       AS ch_init_atk,
   ch.init_tech      AS ch_init_tech,
@@ -34,36 +32,36 @@ SELECT
   ch.max_tech       AS ch_max_tech,
   ch.special_type   AS ch_special_type,
 
-  e.equipment_id    AS equipment_id,
-  e.bonus_hp        AS eq_bonus_hp,
-  e.bonus_atk       AS eq_bonus_atk,
-  e.bonus_tech      AS eq_bonus_tech,
-  e.init_bonus_hp   AS eq_init_bonus_hp,
-  e.init_bonus_atk  AS eq_init_bonus_atk,
-  e.init_bonus_tech AS eq_init_bonus_tech,
-  e.max_bonus_hp    AS eq_max_bonus_hp,
-  e.max_bonus_atk   AS eq_max_bonus_atk,
-  e.max_bonus_tech  AS eq_max_bonus_tech,
-  e.buff_effect     AS eq_buff_effect
+  eq.equipment_id,
+  eq.init_bonus_hp   AS eq_init_bonus_hp,
+  eq.init_bonus_atk  AS eq_init_bonus_atk,
+  eq.init_bonus_tech AS eq_init_bonus_tech,
+  eq.max_bonus_hp    AS eq_max_bonus_hp,
+  eq.max_bonus_atk   AS eq_max_bonus_atk,
+  eq.max_bonus_tech  AS eq_max_bonus_tech,
+  eq.buff_effect     AS eq_buff_effect
+
 FROM user_cards uc
 JOIN cards c ON c.card_id = uc.card_id
 LEFT JOIN characters ch ON ch.card_id = c.card_id
-LEFT JOIN equipments e ON e.card_id = c.card_id
-WHERE uc.user_id = $1
-ORDER BY uc.instance_id DESC
+LEFT JOIN equipments eq ON eq.card_id = c.card_id
+WHERE uc.user_id = $1 AND uc.instance_id = $2
 `
 
-type ListUserCardDetailsRow struct {
+type GetUserCardDetailParams struct {
+	UserID     uuid.UUID
+	InstanceID uuid.UUID
+}
+
+type GetUserCardDetailRow struct {
 	InstanceID      uuid.UUID
 	CardID          int32
+	Level           sql.NullInt16
 	CardName        string
 	CardKind        int16
 	Rarity          sql.NullString
 	CardIconUrl     sql.NullString
 	CharacterID     uuid.NullUUID
-	ChHp            sql.NullInt32
-	ChAtk           sql.NullInt32
-	ChTech          sql.NullInt32
 	ChInitHp        sql.NullInt32
 	ChInitAtk       sql.NullInt32
 	ChInitTech      sql.NullInt32
@@ -72,9 +70,100 @@ type ListUserCardDetailsRow struct {
 	ChMaxTech       sql.NullInt32
 	ChSpecialType   sql.NullString
 	EquipmentID     uuid.NullUUID
-	EqBonusHp       sql.NullInt32
-	EqBonusAtk      sql.NullInt32
-	EqBonusTech     sql.NullInt32
+	EqInitBonusHp   sql.NullInt32
+	EqInitBonusAtk  sql.NullInt32
+	EqInitBonusTech sql.NullInt32
+	EqMaxBonusHp    sql.NullInt32
+	EqMaxBonusAtk   sql.NullInt32
+	EqMaxBonusTech  sql.NullInt32
+	EqBuffEffect    sql.NullString
+}
+
+func (q *Queries) GetUserCardDetail(ctx context.Context, arg GetUserCardDetailParams) (GetUserCardDetailRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserCardDetail, arg.UserID, arg.InstanceID)
+	var i GetUserCardDetailRow
+	err := row.Scan(
+		&i.InstanceID,
+		&i.CardID,
+		&i.Level,
+		&i.CardName,
+		&i.CardKind,
+		&i.Rarity,
+		&i.CardIconUrl,
+		&i.CharacterID,
+		&i.ChInitHp,
+		&i.ChInitAtk,
+		&i.ChInitTech,
+		&i.ChMaxHp,
+		&i.ChMaxAtk,
+		&i.ChMaxTech,
+		&i.ChSpecialType,
+		&i.EquipmentID,
+		&i.EqInitBonusHp,
+		&i.EqInitBonusAtk,
+		&i.EqInitBonusTech,
+		&i.EqMaxBonusHp,
+		&i.EqMaxBonusAtk,
+		&i.EqMaxBonusTech,
+		&i.EqBuffEffect,
+	)
+	return i, err
+}
+
+const listUserCardDetails = `-- name: ListUserCardDetails :many
+SELECT
+  uc.instance_id,
+  uc.card_id,
+  uc.level,
+
+  c.card_name,
+  c.card_kind,
+  c.rarity,
+  c.card_icon_url,
+
+  ch.character_id,
+  ch.init_hp        AS ch_init_hp,
+  ch.init_atk       AS ch_init_atk,
+  ch.init_tech      AS ch_init_tech,
+  ch.max_hp         AS ch_max_hp,
+  ch.max_atk        AS ch_max_atk,
+  ch.max_tech       AS ch_max_tech,
+  ch.special_type   AS ch_special_type,
+
+  eq.equipment_id,
+  eq.init_bonus_hp   AS eq_init_bonus_hp,
+  eq.init_bonus_atk  AS eq_init_bonus_atk,
+  eq.init_bonus_tech AS eq_init_bonus_tech,
+  eq.max_bonus_hp    AS eq_max_bonus_hp,
+  eq.max_bonus_atk   AS eq_max_bonus_atk,
+  eq.max_bonus_tech  AS eq_max_bonus_tech,
+  eq.buff_effect     AS eq_buff_effect
+
+FROM user_cards uc
+JOIN cards c ON c.card_id = uc.card_id
+LEFT JOIN characters ch ON ch.card_id = c.card_id
+LEFT JOIN equipments eq ON eq.card_id = c.card_id
+WHERE uc.user_id = $1
+ORDER BY uc.acquired_date DESC
+`
+
+type ListUserCardDetailsRow struct {
+	InstanceID      uuid.UUID
+	CardID          int32
+	Level           sql.NullInt16
+	CardName        string
+	CardKind        int16
+	Rarity          sql.NullString
+	CardIconUrl     sql.NullString
+	CharacterID     uuid.NullUUID
+	ChInitHp        sql.NullInt32
+	ChInitAtk       sql.NullInt32
+	ChInitTech      sql.NullInt32
+	ChMaxHp         sql.NullInt32
+	ChMaxAtk        sql.NullInt32
+	ChMaxTech       sql.NullInt32
+	ChSpecialType   sql.NullString
+	EquipmentID     uuid.NullUUID
 	EqInitBonusHp   sql.NullInt32
 	EqInitBonusAtk  sql.NullInt32
 	EqInitBonusTech sql.NullInt32
@@ -96,14 +185,12 @@ func (q *Queries) ListUserCardDetails(ctx context.Context, userID uuid.UUID) ([]
 		if err := rows.Scan(
 			&i.InstanceID,
 			&i.CardID,
+			&i.Level,
 			&i.CardName,
 			&i.CardKind,
 			&i.Rarity,
 			&i.CardIconUrl,
 			&i.CharacterID,
-			&i.ChHp,
-			&i.ChAtk,
-			&i.ChTech,
 			&i.ChInitHp,
 			&i.ChInitAtk,
 			&i.ChInitTech,
@@ -112,9 +199,6 @@ func (q *Queries) ListUserCardDetails(ctx context.Context, userID uuid.UUID) ([]
 			&i.ChMaxTech,
 			&i.ChSpecialType,
 			&i.EquipmentID,
-			&i.EqBonusHp,
-			&i.EqBonusAtk,
-			&i.EqBonusTech,
 			&i.EqInitBonusHp,
 			&i.EqInitBonusAtk,
 			&i.EqInitBonusTech,

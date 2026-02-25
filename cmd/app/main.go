@@ -109,6 +109,7 @@ func main() {
 		auth.POST("/user/:userID/gacha-stone/add", gachaStoneHandler.Add)
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)
+		auth.GET("/card/:instanceID/detail", storageHandler.Detail)
 		// auth.POST("/matching", testHandler)
 	}
 

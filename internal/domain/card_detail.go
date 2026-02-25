@@ -40,6 +40,7 @@ type EquipmentDetail struct {
 
 type CardInstanceDetail struct {
 	InstanceID uuid.UUID        `json:"instanceID"`
+	Level      int              `json:"level"`
 	Card       CardMaster       `json:"card"`
 	Character  *CharacterDetail `json:"character,omitempty"`
 	Equipment  *EquipmentDetail `json:"equipment,omitempty"`

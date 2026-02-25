@@ -170,3 +170,25 @@ func (h *StorageGinHandler) ListCardDetails(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
+
+func (h *StorageGinHandler) Detail(c *gin.Context) {
+	userID, err := mustUserIDFromSession(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "認証が必要です"})
+		return
+	}
+
+	instanceID, err := uuid.Parse(c.Param("instanceID"))
+	if err != nil || instanceID == uuid.Nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid instanceID"})
+		return
+	}
+
+	item, err := h.svc.GetCardDetail(c.Request.Context(), userID, instanceID)
+	if err != nil {
+		writeGinDomainError(c, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, item)
+}

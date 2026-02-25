@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +26,26 @@ type AddUserCardParams struct {
 func (q *Queries) AddUserCard(ctx context.Context, arg AddUserCardParams) error {
 	_, err := q.db.ExecContext(ctx, addUserCard, arg.InstanceID, arg.UserID, arg.CardID)
 	return err
+}
+
+const increaseUserCardLevel = `-- name: IncreaseUserCardLevel :execrows
+UPDATE user_cards
+SET level = level + 1
+WHERE user_id = $1 AND instance_id = $2 AND level < $3
+`
+
+type IncreaseUserCardLevelParams struct {
+	UserID     uuid.UUID
+	InstanceID uuid.UUID
+	Level      sql.NullInt16
+}
+
+func (q *Queries) IncreaseUserCardLevel(ctx context.Context, arg IncreaseUserCardLevelParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, increaseUserCardLevel, arg.UserID, arg.InstanceID, arg.Level)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const listUserCards = `-- name: ListUserCards :many
