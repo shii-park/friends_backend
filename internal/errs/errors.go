@@ -29,4 +29,14 @@ var (
 	ErrInvalidCharacterMaxATK  = errors.New("無効な最大ATKです")
 	ErrInvalidCharacterMaxTECH = errors.New("無効な最大TECKです")
 	ErrInvalidSpecialType      = errors.New("無効な必殺技の種類です")
+
+	// ===== Equip =====
+	ErrEquipIDRequired     = errors.New("キャラクターIDは必須です")
+	ErrInvalidEquipID      = errors.New("無効なキャラクターIDです")
+	ErrInvalidEquipHP      = errors.New("無効な付加HPです")
+	ErrInvalidEquipATK     = errors.New("無効な付加ATKです")
+	ErrInvalidEquipTECH    = errors.New("無効な付加TECKです")
+	ErrInvalidEquipMaxHP   = errors.New("無効な最大付加HPです")
+	ErrInvalidEquipMaxATK  = errors.New("無効な最大付加ATKです")
+	ErrInvalidEquipMaxTECH = errors.New("無効な最大付加TECKです")
 )
