@@ -61,7 +61,12 @@ func main() {
 
 	r := gin.Default()
 	// TODO: 余裕があればCORS設定
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
 	// TODO: クッキーの秘密鍵や名前の変更
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
