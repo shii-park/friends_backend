@@ -17,6 +17,7 @@ type Card struct {
 	CardKind    int16
 	CardIconUrl sql.NullString
 	Rarity      sql.NullString
+	CardDetail  sql.NullString
 }
 
 type Character struct {
