@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"strconv"
+
+	_ "github.com/lib/pq"
 )
 
 // ex.
