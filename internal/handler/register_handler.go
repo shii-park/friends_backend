@@ -12,6 +12,7 @@ import (
 )
 
 const initialCardID = 4
+const initialEquipID = 38
 
 // RegisterHandler はユーザー新規登録を処理するハンドラーです
 // ユーザー情報をデータベースに保存し，セッションを保存します．
@@ -56,6 +57,11 @@ func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageSer
 			return
 		}
 		if _, err := storageSvc.AddCard(c.Request.Context(), userUUID, initialCardID); err != nil {
+			_ = svc.DeleteUser(c.Request.Context(), user.ID)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
+			return
+		}
+		if _, err := storageSvc.AddCard(c.Request.Context(), userUUID, initialEquipID); err != nil {
 			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			return
