@@ -65,4 +65,6 @@ var (
 	// ===== Gacha =====
 	ErrInvalidGachaCount = errors.New("無効なガチャの回数です")
 	ErrInvalidGachaKind  = errors.New("無効なガチャの種類です")
+
+	ErrCollectionNil = errors.New("図鑑には何もありません")
 )

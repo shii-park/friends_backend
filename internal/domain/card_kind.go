@@ -1,16 +1,15 @@
 package domain
 
-type CardKind string
+type CardKind int
 
 const (
-	CardKindUnknown   CardKind = ""
-	CardKindCharacter CardKind = "chara"
-	CardKindEquip     CardKind = "equip"
+	CardKindEquip     CardKind = 0
+	CardKindCharacter CardKind = 1
 )
 
 func (k CardKind) IsValid() bool {
 	switch k {
-	case CardKindCharacter, CardKindEquip:
+	case CardKindEquip, CardKindCharacter:
 		return true
 	default:
 		return false
