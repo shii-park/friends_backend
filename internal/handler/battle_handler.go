@@ -30,6 +30,15 @@ type outMessage struct {
 	Outcome        string `json:"outcome,omitempty"`
 	RankPointDelta int    `json:"rankPointDelta,omitempty"`
 	Error          string `json:"error,omitempty"`
+	// ready時のNPC情報
+	NpcCharaName   string `json:"npcCharaName,omitempty"`
+	NpcCharaRarity string `json:"npcCharaRarity,omitempty"`
+	NpcEquipName   string `json:"npcEquipName,omitempty"`
+	NpcEquipRarity string `json:"npcEquipRarity,omitempty"`
+	NpcSpecialType string `json:"npcSpecialType,omitempty"`
+	// game_over時の報酬
+	CoinReward  int `json:"coinReward,omitempty"`
+	StoneReward int `json:"stoneReward,omitempty"`
 }
 
 type BattleGinHandler struct {
@@ -82,11 +91,21 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 				return
 			}
 
-			conn.WriteJSON(outMessage{
+			resp := outMessage{
 				Type:     "ready",
 				PlayerHP: session.Battle.PlayerHP,
 				NpcHP:    session.Battle.OppoHP,
-			})
+			}
+			if session.NpcChara != nil {
+				resp.NpcCharaName = session.NpcChara.Name
+				resp.NpcCharaRarity = string(session.NpcChara.Rarity)
+				resp.NpcSpecialType = string(session.NpcChara.SpecialType)
+			}
+			if session.NpcEquip != nil {
+				resp.NpcEquipName = session.NpcEquip.Name
+				resp.NpcEquipRarity = string(session.NpcEquip.Rarity)
+			}
+			conn.WriteJSON(resp)
 
 		case "round":
 			if session == nil {
@@ -114,6 +133,8 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 					NpcHand:        string(result.NpcHand),
 					Outcome:        result.Outcome,
 					RankPointDelta: result.RankPointDelta,
+					CoinReward:     result.CoinReward,
+					StoneReward:    result.StoneReward,
 				})
 				return
 			}

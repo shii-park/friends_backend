@@ -21,8 +21,10 @@ func NewBattleService(queries *sqlc.Queries) *BattleService {
 
 // BattleSession はWebSocketコネクション中に保持するバトル状態
 type BattleSession struct {
-	Battle *domain.Battle
-	UserID uuid.UUID
+	Battle   *domain.Battle
+	UserID   uuid.UUID
+	NpcChara *domain.Character
+	NpcEquip *domain.Equip
 }
 
 // RoundResult は1ラウンドの結果
@@ -33,6 +35,8 @@ type RoundResult struct {
 	IsOver         bool
 	Outcome        string
 	RankPointDelta int
+	CoinReward     int
+	StoneReward    int
 }
 
 // BattleResult はゲーム終了時の結果
@@ -49,22 +53,22 @@ func randomAttackType() domain.AttackType {
 
 // StartBattle はバトルを初期化してセッションを返す
 func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, charaID, equipID uuid.UUID) (*BattleSession, error) {
-	// 自分のキャラクター・装備を取得する
-	dbPlayerChara, err := s.queries.GetCharacter(ctx, charaID)
+	// 自分のキャラクター・装備を取得する（カード情報付き）
+	dbPlayerChara, err := s.queries.GetCharacterWithCard(ctx, charaID)
 	if err != nil {
 		return nil, errs.ErrInvalidCharaID
 	}
-	dbPlayerEquip, err := s.queries.GetEquipment(ctx, equipID)
+	dbPlayerEquip, err := s.queries.GetEquipmentWithCard(ctx, equipID)
 	if err != nil {
 		return nil, errs.ErrInvalidEquipID
 	}
 
-	// 相手NPCのキャラクター・装備をランダムで選ぶ
-	allCharas, err := s.queries.GetAllCharacters(ctx)
+	// 相手NPCのキャラクター・装備をランダムで選ぶ（カード情報付き）
+	allCharas, err := s.queries.GetAllCharactersWithCard(ctx)
 	if err != nil || len(allCharas) == 0 {
 		return nil, errs.ErrInvalidCharaID
 	}
-	allEquips, err := s.queries.GetAllEquipments(ctx)
+	allEquips, err := s.queries.GetAllEquipmentsWithCard(ctx)
 	if err != nil || len(allEquips) == 0 {
 		return nil, errs.ErrInvalidEquipID
 	}
@@ -72,10 +76,10 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 	dbNpcEquip := allEquips[rand.IntN(len(allEquips))]
 
 	// sqlc型をdomain型に変換
-	playerChara := todomainChara(dbPlayerChara)
-	playerEquip := todomainEquip(dbPlayerEquip)
-	npcChara := todomainChara(dbNpcChara)
-	npcEquip := todomainEquip(dbNpcEquip)
+	playerChara := todomainCharaWithCard(dbPlayerChara)
+	playerEquip := todomainEquipWithCard(dbPlayerEquip)
+	npcChara := todomainCharaWithCardFromMany(dbNpcChara)
+	npcEquip := todomainEquipWithCardFromMany(dbNpcEquip)
 
 	if playerChara == nil || npcChara == nil || playerEquip == nil || npcEquip == nil {
 		return nil, errs.ErrInvalidCharaID
@@ -84,8 +88,10 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 	battle := domain.NewBattle(playerChara, npcChara, playerEquip, npcEquip, playerChara.HP, npcChara.HP)
 
 	return &BattleSession{
-		Battle: battle,
-		UserID: userID,
+		Battle:   battle,
+		UserID:   userID,
+		NpcChara: npcChara,
+		NpcEquip: npcEquip,
 	}, nil
 }
 
@@ -105,7 +111,7 @@ func (s *BattleService) RoundBattle(ctx context.Context, session *BattleSession,
 
 	// どちらかのHPが0以下になったらゲーム終了
 	if playerHP <= 0 || npcHP <= 0 {
-		outcome, delta, err := s.finishBattle(ctx, session, playerHP, npcHP)
+		outcome, delta, coinReward, stoneReward, err := s.finishBattle(ctx, session, playerHP, npcHP)
 		if err != nil {
 			return nil, err
 		}
@@ -116,6 +122,8 @@ func (s *BattleService) RoundBattle(ctx context.Context, session *BattleSession,
 			IsOver:         true,
 			Outcome:        outcome,
 			RankPointDelta: delta,
+			CoinReward:     coinReward,
+			StoneReward:    stoneReward,
 		}, nil
 	}
 
@@ -127,18 +135,24 @@ func (s *BattleService) RoundBattle(ctx context.Context, session *BattleSession,
 	}, nil
 }
 
-// finishBattle は勝敗を判定しランクポイントをDBに保存する
-func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession, playerHP, npcHP int) (string, int, error) {
+// finishBattle は勝敗を判定しランクポイントをDBに保存し、勝利時は報酬を付与する
+func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession, playerHP, npcHP int) (string, int, int, int, error) {
 	const winDelta = 10
 	const loseDelta = 5
+	const winCoinReward = 100
+	const winStoneReward = 1
 
 	var outcome string
 	var delta int
+	var coinReward int
+	var stoneReward int
 
 	switch {
 	case playerHP > 0 && npcHP <= 0:
 		outcome = string(domain.Win)
 		delta = winDelta
+		coinReward = winCoinReward
+		stoneReward = winStoneReward
 	case playerHP <= 0 && npcHP > 0:
 		outcome = string(domain.Lose)
 		delta = -loseDelta
@@ -150,7 +164,7 @@ func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession
 	// 現在のランクポイントを取得してから更新する
 	dbUser, err := s.queries.GetUser(ctx, session.UserID)
 	if err != nil {
-		return "", 0, errs.ErrUserNotFound
+		return "", 0, 0, 0, errs.ErrUserNotFound
 	}
 
 	newRankPoint := int(dbUser.RankPoint) + delta
@@ -163,19 +177,46 @@ func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession
 		RankPoint: int32(newRankPoint),
 	})
 	if err != nil {
-		return "", 0, err
+		return "", 0, 0, 0, err
 	}
 
-	return outcome, delta, nil
+	// 勝利時はコインとガチャ石を付与
+	if outcome == string(domain.Win) {
+		_, err = s.queries.AddUserCoin(ctx, sqlc.AddUserCoinParams{
+			Amount: int32(coinReward),
+			UserID: session.UserID,
+		})
+		if err != nil {
+			return "", 0, 0, 0, err
+		}
+
+		_, err = s.queries.AddUserGachaStone(ctx, sqlc.AddUserGachaStoneParams{
+			Amount: int32(stoneReward),
+			UserID: session.UserID,
+		})
+		if err != nil {
+			return "", 0, 0, 0, err
+		}
+	}
+
+	return outcome, delta, coinReward, stoneReward, nil
 }
 
-func todomainChara(c sqlc.Character) *domain.Character {
+func todomainCharaWithCard(c sqlc.GetCharacterWithCardRow) *domain.Character {
+	rarity := ""
+	if c.Rarity.Valid {
+		rarity = c.Rarity.String
+	}
+	iconURL := ""
+	if c.CardIconUrl.Valid {
+		iconURL = c.CardIconUrl.String
+	}
 	chara, _ := domain.NewCharacter(
 		fmt.Sprintf("%d", c.CardID),
 		c.CharacterID.String(),
-		"",
-		"",
-		domain.Rarity(""),
+		c.CardName,
+		iconURL,
+		domain.Rarity(rarity),
 		int(c.InitHp), int(c.InitAtk), int(c.InitTech),
 		int(c.MaxHp), int(c.MaxAtk), int(c.MaxTech),
 		domain.SpecialType(c.SpecialType.String),
@@ -183,12 +224,66 @@ func todomainChara(c sqlc.Character) *domain.Character {
 	return chara
 }
 
-func todomainEquip(e sqlc.Equipment) *domain.Equip {
+func todomainEquipWithCard(e sqlc.GetEquipmentWithCardRow) *domain.Equip {
+	rarity := ""
+	if e.Rarity.Valid {
+		rarity = e.Rarity.String
+	}
+	iconURL := ""
+	if e.CardIconUrl.Valid {
+		iconURL = e.CardIconUrl.String
+	}
 	equip, _ := domain.NewEquip(
 		fmt.Sprintf("%d", e.CardID),
 		e.EquipmentID.String(),
-		"", "",
-		domain.Rarity(""),
+		e.CardName,
+		iconURL,
+		domain.Rarity(rarity),
+		int(e.InitBonusHp), int(e.InitBonusAtk), int(e.InitBonusTech),
+		int(e.MaxBonusHp), int(e.MaxBonusAtk), int(e.MaxBonusTech),
+		nil,
+	)
+	return equip
+}
+
+// GetAllCharactersWithCard用のオーバーロード
+func todomainCharaWithCardFromMany(c sqlc.GetAllCharactersWithCardRow) *domain.Character {
+	rarity := ""
+	if c.Rarity.Valid {
+		rarity = c.Rarity.String
+	}
+	iconURL := ""
+	if c.CardIconUrl.Valid {
+		iconURL = c.CardIconUrl.String
+	}
+	chara, _ := domain.NewCharacter(
+		fmt.Sprintf("%d", c.CardID),
+		c.CharacterID.String(),
+		c.CardName,
+		iconURL,
+		domain.Rarity(rarity),
+		int(c.InitHp), int(c.InitAtk), int(c.InitTech),
+		int(c.MaxHp), int(c.MaxAtk), int(c.MaxTech),
+		domain.SpecialType(c.SpecialType.String),
+	)
+	return chara
+}
+
+func todomainEquipWithCardFromMany(e sqlc.GetAllEquipmentsWithCardRow) *domain.Equip {
+	rarity := ""
+	if e.Rarity.Valid {
+		rarity = e.Rarity.String
+	}
+	iconURL := ""
+	if e.CardIconUrl.Valid {
+		iconURL = e.CardIconUrl.String
+	}
+	equip, _ := domain.NewEquip(
+		fmt.Sprintf("%d", e.CardID),
+		e.EquipmentID.String(),
+		e.CardName,
+		iconURL,
+		domain.Rarity(rarity),
 		int(e.InitBonusHp), int(e.InitBonusAtk), int(e.InitBonusTech),
 		int(e.MaxBonusHp), int(e.MaxBonusAtk), int(e.MaxBonusTech),
 		nil,

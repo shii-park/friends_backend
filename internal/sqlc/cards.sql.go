@@ -161,6 +161,70 @@ func (q *Queries) GetAllCharacters(ctx context.Context) ([]Character, error) {
 	return items, nil
 }
 
+const getAllCharactersWithCard = `-- name: GetAllCharactersWithCard :many
+SELECT ch.character_id, c.card_id, c.card_name, c.card_icon_url, c.rarity,
+  ch.hp, ch.atk, ch.tech, ch.init_hp, ch.init_atk, ch.init_tech,
+  ch.max_hp, ch.max_atk, ch.max_tech, ch.special_type
+FROM characters ch JOIN cards c ON c.card_id = ch.card_id
+`
+
+type GetAllCharactersWithCardRow struct {
+	CharacterID uuid.UUID
+	CardID      int32
+	CardName    string
+	CardIconUrl sql.NullString
+	Rarity      sql.NullString
+	Hp          int32
+	Atk         int32
+	Tech        int32
+	InitHp      int32
+	InitAtk     int32
+	InitTech    int32
+	MaxHp       int32
+	MaxAtk      int32
+	MaxTech     int32
+	SpecialType sql.NullString
+}
+
+func (q *Queries) GetAllCharactersWithCard(ctx context.Context) ([]GetAllCharactersWithCardRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCharactersWithCard)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllCharactersWithCardRow
+	for rows.Next() {
+		var i GetAllCharactersWithCardRow
+		if err := rows.Scan(
+			&i.CharacterID,
+			&i.CardID,
+			&i.CardName,
+			&i.CardIconUrl,
+			&i.Rarity,
+			&i.Hp,
+			&i.Atk,
+			&i.Tech,
+			&i.InitHp,
+			&i.InitAtk,
+			&i.InitTech,
+			&i.MaxHp,
+			&i.MaxAtk,
+			&i.MaxTech,
+			&i.SpecialType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllEquipments = `-- name: GetAllEquipments :many
 SELECT equipment_id, card_id, bonus_hp, bonus_atk, bonus_tech, init_bonus_hp, init_bonus_atk, init_bonus_tech, max_bonus_hp, max_bonus_atk, max_bonus_tech, buff_effect FROM equipments
 `
@@ -177,6 +241,70 @@ func (q *Queries) GetAllEquipments(ctx context.Context) ([]Equipment, error) {
 		if err := rows.Scan(
 			&i.EquipmentID,
 			&i.CardID,
+			&i.BonusHp,
+			&i.BonusAtk,
+			&i.BonusTech,
+			&i.InitBonusHp,
+			&i.InitBonusAtk,
+			&i.InitBonusTech,
+			&i.MaxBonusHp,
+			&i.MaxBonusAtk,
+			&i.MaxBonusTech,
+			&i.BuffEffect,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllEquipmentsWithCard = `-- name: GetAllEquipmentsWithCard :many
+SELECT e.equipment_id, c.card_id, c.card_name, c.card_icon_url, c.rarity,
+  e.bonus_hp, e.bonus_atk, e.bonus_tech, e.init_bonus_hp, e.init_bonus_atk, e.init_bonus_tech,
+  e.max_bonus_hp, e.max_bonus_atk, e.max_bonus_tech, e.buff_effect
+FROM equipments e JOIN cards c ON c.card_id = e.card_id
+`
+
+type GetAllEquipmentsWithCardRow struct {
+	EquipmentID   uuid.UUID
+	CardID        int32
+	CardName      string
+	CardIconUrl   sql.NullString
+	Rarity        sql.NullString
+	BonusHp       int32
+	BonusAtk      int32
+	BonusTech     int32
+	InitBonusHp   int32
+	InitBonusAtk  int32
+	InitBonusTech int32
+	MaxBonusHp    int32
+	MaxBonusAtk   int32
+	MaxBonusTech  int32
+	BuffEffect    sql.NullString
+}
+
+func (q *Queries) GetAllEquipmentsWithCard(ctx context.Context) ([]GetAllEquipmentsWithCardRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllEquipmentsWithCard)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllEquipmentsWithCardRow
+	for rows.Next() {
+		var i GetAllEquipmentsWithCardRow
+		if err := rows.Scan(
+			&i.EquipmentID,
+			&i.CardID,
+			&i.CardName,
+			&i.CardIconUrl,
+			&i.Rarity,
 			&i.BonusHp,
 			&i.BonusAtk,
 			&i.BonusTech,
@@ -225,6 +353,55 @@ func (q *Queries) GetCharacter(ctx context.Context, characterID uuid.UUID) (Char
 	return i, err
 }
 
+const getCharacterWithCard = `-- name: GetCharacterWithCard :one
+SELECT ch.character_id, c.card_id, c.card_name, c.card_icon_url, c.rarity,
+  ch.hp, ch.atk, ch.tech, ch.init_hp, ch.init_atk, ch.init_tech,
+  ch.max_hp, ch.max_atk, ch.max_tech, ch.special_type
+FROM characters ch JOIN cards c ON c.card_id = ch.card_id
+WHERE ch.character_id = $1 LIMIT 1
+`
+
+type GetCharacterWithCardRow struct {
+	CharacterID uuid.UUID
+	CardID      int32
+	CardName    string
+	CardIconUrl sql.NullString
+	Rarity      sql.NullString
+	Hp          int32
+	Atk         int32
+	Tech        int32
+	InitHp      int32
+	InitAtk     int32
+	InitTech    int32
+	MaxHp       int32
+	MaxAtk      int32
+	MaxTech     int32
+	SpecialType sql.NullString
+}
+
+func (q *Queries) GetCharacterWithCard(ctx context.Context, characterID uuid.UUID) (GetCharacterWithCardRow, error) {
+	row := q.db.QueryRowContext(ctx, getCharacterWithCard, characterID)
+	var i GetCharacterWithCardRow
+	err := row.Scan(
+		&i.CharacterID,
+		&i.CardID,
+		&i.CardName,
+		&i.CardIconUrl,
+		&i.Rarity,
+		&i.Hp,
+		&i.Atk,
+		&i.Tech,
+		&i.InitHp,
+		&i.InitAtk,
+		&i.InitTech,
+		&i.MaxHp,
+		&i.MaxAtk,
+		&i.MaxTech,
+		&i.SpecialType,
+	)
+	return i, err
+}
+
 const getEquipment = `-- name: GetEquipment :one
 SELECT equipment_id, card_id, bonus_hp, bonus_atk, bonus_tech, init_bonus_hp, init_bonus_atk, init_bonus_tech, max_bonus_hp, max_bonus_atk, max_bonus_tech, buff_effect FROM equipments WHERE equipment_id=$1 LIMIT 1
 `
@@ -235,6 +412,55 @@ func (q *Queries) GetEquipment(ctx context.Context, equipmentID uuid.UUID) (Equi
 	err := row.Scan(
 		&i.EquipmentID,
 		&i.CardID,
+		&i.BonusHp,
+		&i.BonusAtk,
+		&i.BonusTech,
+		&i.InitBonusHp,
+		&i.InitBonusAtk,
+		&i.InitBonusTech,
+		&i.MaxBonusHp,
+		&i.MaxBonusAtk,
+		&i.MaxBonusTech,
+		&i.BuffEffect,
+	)
+	return i, err
+}
+
+const getEquipmentWithCard = `-- name: GetEquipmentWithCard :one
+SELECT e.equipment_id, c.card_id, c.card_name, c.card_icon_url, c.rarity,
+  e.bonus_hp, e.bonus_atk, e.bonus_tech, e.init_bonus_hp, e.init_bonus_atk, e.init_bonus_tech,
+  e.max_bonus_hp, e.max_bonus_atk, e.max_bonus_tech, e.buff_effect
+FROM equipments e JOIN cards c ON c.card_id = e.card_id
+WHERE e.equipment_id = $1 LIMIT 1
+`
+
+type GetEquipmentWithCardRow struct {
+	EquipmentID   uuid.UUID
+	CardID        int32
+	CardName      string
+	CardIconUrl   sql.NullString
+	Rarity        sql.NullString
+	BonusHp       int32
+	BonusAtk      int32
+	BonusTech     int32
+	InitBonusHp   int32
+	InitBonusAtk  int32
+	InitBonusTech int32
+	MaxBonusHp    int32
+	MaxBonusAtk   int32
+	MaxBonusTech  int32
+	BuffEffect    sql.NullString
+}
+
+func (q *Queries) GetEquipmentWithCard(ctx context.Context, equipmentID uuid.UUID) (GetEquipmentWithCardRow, error) {
+	row := q.db.QueryRowContext(ctx, getEquipmentWithCard, equipmentID)
+	var i GetEquipmentWithCardRow
+	err := row.Scan(
+		&i.EquipmentID,
+		&i.CardID,
+		&i.CardName,
+		&i.CardIconUrl,
+		&i.Rarity,
 		&i.BonusHp,
 		&i.BonusAtk,
 		&i.BonusTech,
