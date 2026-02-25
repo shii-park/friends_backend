@@ -69,7 +69,8 @@ func main() {
 	gachaStoneSvc := service.NewGachaStoneService(userRepo)
 	gachaStoneHandler := handler.NewGachaStoneGinHandler(gachaStoneSvc)
 
-	gachaSvc := service.NewGachaService(dbConn, queries, storageRepo)
+	gachaRepo := repository.NewGachaRepository(dbConn, queries, storageRepo)
+	gachaSvc := service.NewGachaService(dbConn, queries, gachaRepo, storageRepo)
 	gachaHandler := handler.NewGachaGinHandler(gachaSvc)
 
 	r := gin.Default()
@@ -95,7 +96,9 @@ func main() {
 		// TODO:以下は動作検証用エンドポイントなので後で削除
 		auth.GET("/ping", testHandler)
 		auth.GET("/battle/ws", battleHandler.WS)
-		auth.GET("/gacha/lineup", testHandler)
+		auth.GET("/gacha/characters", gachaHandler.ListCharacters)
+		auth.GET("/gacha/equipments", gachaHandler.ListEquipments)
+		auth.GET("/gacha/lineup", gachaHandler.Lineup)
 		auth.POST("/gacha/draw", gachaHandler.Draw)
 
 		auth.GET("/storage", storageHandler.ListCards)

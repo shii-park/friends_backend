@@ -22,7 +22,6 @@ type drawRequest struct {
 }
 
 func (h *GachaGinHandler) Draw(c *gin.Context) {
-	// 認証：セッションに userID が入っている想定
 	sess := sessions.Default(c)
 	raw := sess.Get("userID")
 	userIDStr, _ := raw.(string)
@@ -44,7 +43,6 @@ func (h *GachaGinHandler) Draw(c *gin.Context) {
 
 	newStone, results, err := h.svc.Draw(c.Request.Context(), userID, req.Count)
 	if err != nil {
-		// 既存のエラー変換があるならそこに寄せると良い
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -54,4 +52,31 @@ func (h *GachaGinHandler) Draw(c *gin.Context) {
 		"gachaStone": newStone,
 		"results":    results,
 	})
+}
+
+func (h *GachaGinHandler) ListCharacters(c *gin.Context) {
+	items, err := h.svc.ListCharacters(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *GachaGinHandler) ListEquipments(c *gin.Context) {
+	items, err := h.svc.ListEquipments(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *GachaGinHandler) Lineup(c *gin.Context) {
+	res, err := h.svc.Lineup(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
 }

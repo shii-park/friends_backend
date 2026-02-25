@@ -15,19 +15,25 @@ import (
 )
 
 type GachaService struct {
-	db        *sql.DB
-	q         *sqlc.Queries
-	gachaRepo *repository.GachaRepository
-	storage   domain.StorageRepository
+	db      *sql.DB
+	q       *sqlc.Queries
+	repo    repository.GachaRepository
+	storage domain.StorageRepository
 
 	rng         *rand.Rand
 	saveHistory bool
 }
 
-func NewGachaService(db *sql.DB, q *sqlc.Queries, storage domain.StorageRepository) *GachaService {
+func NewGachaService(
+	db *sql.DB,
+	q *sqlc.Queries,
+	repo repository.GachaRepository,
+	storage domain.StorageRepository,
+) *GachaService {
 	return &GachaService{
 		db:          db,
 		q:           q,
+		repo:        repo,
 		storage:     storage,
 		rng:         rand.New(rand.NewSource(time.Now().UnixNano())),
 		saveHistory: false,
@@ -55,7 +61,6 @@ func (s *GachaService) Draw(ctx context.Context, userID uuid.UUID, count int) (n
 
 	qtx := s.q.WithTx(tx)
 
-	// 石消費（1回=1）
 	ns, err := qtx.ConsumeUserGachaStone(ctx, sqlc.ConsumeUserGachaStoneParams{
 		UserID: userID,
 		Amount: int32(count),
@@ -75,7 +80,6 @@ func (s *GachaService) Draw(ctx context.Context, userID uuid.UUID, count int) (n
 		rarityNS := sql.NullString{String: rarity, Valid: true}
 
 		var cardID int32
-
 		switch kind {
 		case "character":
 			cardID, err = qtx.GetRandomCharacterByRarity(ctx, rarityNS)
@@ -90,7 +94,6 @@ func (s *GachaService) Draw(ctx context.Context, userID uuid.UUID, count int) (n
 
 		instanceID := uuid.New()
 
-		// 既存 storage に付与
 		if err := s.storage.AddCard(ctx, userID, instanceID, int(cardID)); err != nil {
 			return 0, nil, err
 		}
@@ -111,12 +114,9 @@ func (s *GachaService) Draw(ctx context.Context, userID uuid.UUID, count int) (n
 	return int(ns), out, nil
 }
 
-// roll は仕様どおりの確率で kind/rarity/pickup を決める
 func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
-	// kind
 	if s.randPct() < 40.0 {
 		kind = "character"
-		// character rarity（合計40%）
 		r := s.randPct()
 		switch {
 		case r < 21.25:
@@ -128,10 +128,8 @@ func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
 		case r < 21.25+10.0+5.0+2.5:
 			rarity = "SR"
 		default:
-			rarity = "SSR" // 1.25
+			rarity = "SSR"
 		}
-
-		// pickup（SSRキャラのみ：恒常0.5 / PU0.75 → SSRキャラ内で PU=0.75/1.25=60%）
 		if rarity == "SSR" {
 			isPickup = s.randPct() < 60.0
 		}
@@ -139,7 +137,6 @@ func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
 	}
 
 	kind = "equip"
-	// equip rarity（合計60%）
 	r := s.randPct()
 	switch {
 	case r < 31.875:
@@ -151,11 +148,39 @@ func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
 	case r < 31.875+15.0+7.5+3.75:
 		rarity = "SR"
 	default:
-		rarity = "SSR" // 1.875
+		rarity = "SSR"
 	}
 	return
 }
 
 func (s *GachaService) randPct() float64 {
 	return s.rng.Float64() * 100.0
+}
+
+func (s *GachaService) ListCharacters(ctx context.Context) ([]repository.GachaCharacter, error) {
+	return s.repo.ListCharacters(ctx)
+}
+
+func (s *GachaService) ListEquipments(ctx context.Context) ([]repository.GachaEquipment, error) {
+	return s.repo.ListEquipments(ctx)
+}
+
+type LineupResponse struct {
+	Characters []repository.GachaCharacter `json:"characters"`
+	Equipments []repository.GachaEquipment `json:"equipments"`
+}
+
+func (s *GachaService) Lineup(ctx context.Context) (LineupResponse, error) {
+	chars, err := s.repo.ListCharacters(ctx)
+	if err != nil {
+		return LineupResponse{}, err
+	}
+	eqs, err := s.repo.ListEquipments(ctx)
+	if err != nil {
+		return LineupResponse{}, err
+	}
+	return LineupResponse{
+		Characters: chars,
+		Equipments: eqs,
+	}, nil
 }

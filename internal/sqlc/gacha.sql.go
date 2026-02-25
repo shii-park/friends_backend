@@ -8,6 +8,8 @@ package sqlc
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 const getRandomCharacterByRarity = `-- name: GetRandomCharacterByRarity :one
@@ -40,4 +42,165 @@ func (q *Queries) GetRandomEquipByRarity(ctx context.Context, rarity sql.NullStr
 	var card_id int32
 	err := row.Scan(&card_id)
 	return card_id, err
+}
+
+const listGachaCharacters = `-- name: ListGachaCharacters :many
+SELECT
+  c.card_id,
+  c.card_name,
+  c.card_kind,
+  c.rarity,
+  c.card_icon_url,
+  ch.character_id,
+  ch.hp, ch.atk, ch.tech,
+  ch.init_hp, ch.init_atk, ch.init_tech,
+  ch.max_hp, ch.max_atk, ch.max_tech,
+  ch.special_type
+FROM cards c
+JOIN characters ch ON ch.card_id = c.card_id
+WHERE c.card_kind = 1
+ORDER BY c.card_id ASC
+`
+
+type ListGachaCharactersRow struct {
+	CardID      int32
+	CardName    string
+	CardKind    int16
+	Rarity      sql.NullString
+	CardIconUrl sql.NullString
+	CharacterID uuid.UUID
+	Hp          int32
+	Atk         int32
+	Tech        int32
+	InitHp      int32
+	InitAtk     int32
+	InitTech    int32
+	MaxHp       int32
+	MaxAtk      int32
+	MaxTech     int32
+	SpecialType sql.NullString
+}
+
+func (q *Queries) ListGachaCharacters(ctx context.Context) ([]ListGachaCharactersRow, error) {
+	rows, err := q.db.QueryContext(ctx, listGachaCharacters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListGachaCharactersRow
+	for rows.Next() {
+		var i ListGachaCharactersRow
+		if err := rows.Scan(
+			&i.CardID,
+			&i.CardName,
+			&i.CardKind,
+			&i.Rarity,
+			&i.CardIconUrl,
+			&i.CharacterID,
+			&i.Hp,
+			&i.Atk,
+			&i.Tech,
+			&i.InitHp,
+			&i.InitAtk,
+			&i.InitTech,
+			&i.MaxHp,
+			&i.MaxAtk,
+			&i.MaxTech,
+			&i.SpecialType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listGachaEquipments = `-- name: ListGachaEquipments :many
+SELECT
+  c.card_id,
+  c.card_name,
+  c.card_kind,
+  c.rarity,
+  c.card_icon_url,
+
+  e.equipment_id,
+  e.bonus_hp,
+  e.bonus_atk,
+  e.bonus_tech,
+  e.init_bonus_hp,
+  e.init_bonus_atk,
+  e.init_bonus_tech,
+  e.max_bonus_hp,
+  e.max_bonus_atk,
+  e.max_bonus_tech,
+  e.buff_effect
+FROM cards c
+JOIN equipments e ON e.card_id = c.card_id
+WHERE c.card_kind = 0
+ORDER BY c.card_id ASC
+`
+
+type ListGachaEquipmentsRow struct {
+	CardID        int32
+	CardName      string
+	CardKind      int16
+	Rarity        sql.NullString
+	CardIconUrl   sql.NullString
+	EquipmentID   uuid.UUID
+	BonusHp       int32
+	BonusAtk      int32
+	BonusTech     int32
+	InitBonusHp   int32
+	InitBonusAtk  int32
+	InitBonusTech int32
+	MaxBonusHp    int32
+	MaxBonusAtk   int32
+	MaxBonusTech  int32
+	BuffEffect    sql.NullString
+}
+
+func (q *Queries) ListGachaEquipments(ctx context.Context) ([]ListGachaEquipmentsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listGachaEquipments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListGachaEquipmentsRow
+	for rows.Next() {
+		var i ListGachaEquipmentsRow
+		if err := rows.Scan(
+			&i.CardID,
+			&i.CardName,
+			&i.CardKind,
+			&i.Rarity,
+			&i.CardIconUrl,
+			&i.EquipmentID,
+			&i.BonusHp,
+			&i.BonusAtk,
+			&i.BonusTech,
+			&i.InitBonusHp,
+			&i.InitBonusAtk,
+			&i.InitBonusTech,
+			&i.MaxBonusHp,
+			&i.MaxBonusAtk,
+			&i.MaxBonusTech,
+			&i.BuffEffect,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
