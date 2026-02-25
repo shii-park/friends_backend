@@ -197,8 +197,7 @@ func (u *User) ConsumeRankPoint(amount int) error {
 	}
 
 	if u.RankPoint < amount {
-		u.RankPoint = 0
-		return nil
+		return u.SetRankPoint(InitialRankPoint)
 	}
 
 	u.addRankPoint(-amount)
@@ -209,6 +208,17 @@ func (u *User) ConsumeRankPoint(amount int) error {
 // ランクポイントの値を足す
 func (u *User) addRankPoint(delta int) {
 	u.RankPoint += delta
+}
+
+// SetRankPoint ランクポイントをセットする
+func (u *User) SetRankPoint(setPoint int) error {
+	if setPoint < 0 {
+		return errs.ErrInvalidRankPoint
+	}
+
+	u.RankPoint = setPoint
+
+	return nil
 }
 
 // AddCoin 通貨を増やす
