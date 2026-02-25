@@ -50,4 +50,7 @@ var (
 	ErrInvalidEquipTECHDelta = errors.New("無効なTECHの増加量です")
 	ErrEquipAlreadyMaxLevel  = errors.New("既に最大レベルです")
 	ErrInvalidEquipLevel     = errors.New("不正なレベルです")
+
+	// ===== queue ======
+	ErrNoUsersInQueue = errors.New("キューに人がいませんでした")
 )
