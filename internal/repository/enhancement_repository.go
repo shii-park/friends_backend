@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/domain"
+	"github.com/shii-park/friends/internal/errs"
 	"github.com/shii-park/friends/internal/sqlc"
 )
 
@@ -76,7 +77,7 @@ func (r *enhancementRepository) EnhanceCardByCoin(
 	// 合計コスト（あなたのテーブル）
 	cost = domain.TotalCoinCostForLevelUps(currentLevel, times)
 	if cost <= 0 {
-		return 0, 0, domain.ErrInvalidEnhanceCost // errsにあるならそっちで
+		return 0, 0, errs.ErrInvalidEnhanceCost
 	}
 
 	// ユーザーコイン（ロック）
@@ -85,7 +86,7 @@ func (r *enhancementRepository) EnhanceCardByCoin(
 		return 0, 0, err
 	}
 	if int(coin) < cost {
-		return 0, 0, domain.ErrInsufficientCoin
+		return 0, 0, errs.ErrInsufficientCoin
 	}
 
 	newLevel = currentLevel + times
@@ -105,7 +106,10 @@ func (r *enhancementRepository) EnhanceCardByCoin(
 	if err := qtx.UpdateUserCardLevel(ctx, sqlc.UpdateUserCardLevelParams{
 		InstanceID: instanceID,
 		UserID:     userID,
-		Level:      int32(newLevel),
+		Level: sql.NullInt16{
+			Int16: int16(newLevel),
+			Valid: true,
+		},
 	}); err != nil {
 		return 0, 0, err
 	}
