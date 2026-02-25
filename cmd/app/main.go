@@ -60,6 +60,7 @@ func main() {
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
 	// User
+	getUserSvc := service.NewGetUserService(queries)
 	userRepo := repository.NewUserRepository(queries)
 
 	coinSvc := service.NewCoinService(userRepo)
@@ -102,7 +103,7 @@ func main() {
 		auth.DELETE("/storage/cards/:instanceID", storageHandler.RemoveCard)
 		auth.GET("/storage/detail", storageHandler.ListCardDetails)
 
-		auth.GET("/user/:userID/get", testHandler)
+		auth.GET("/user/:userID/get", handler.GetUserHandler(getUserSvc))
 		auth.DELETE("/user/:userID/delete", testHandler)
 
 		auth.POST("/user/:userID/coin/add", coinHandler.Add)
