@@ -86,8 +86,8 @@ func (s *Storage) Has(cardID string) bool {
 	return ok
 }
 
-// List 一覧取得
-func (s *Storage) List() []string {
+// AllList 一覧取得
+func (s *Storage) AllList() []string {
 	if s == nil {
 		return nil
 	}
@@ -101,8 +101,8 @@ func (s *Storage) List() []string {
 	return result
 }
 
-// Count 枚数
-func (s *Storage) Count() int {
+// AllCount 枚数
+func (s *Storage) AllCount() int {
 	if s == nil {
 		return 0
 	}
