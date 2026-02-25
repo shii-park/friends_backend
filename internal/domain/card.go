@@ -47,9 +47,10 @@ type BaseCard struct {
 
 	AcquiredDate time.Time `json:"acquiredDate"`
 	Level        int       `json:"level"`
+	Kind         CardKind  `json:"cardKind"`
 }
 
-func NewCard(id string, name string, icon string, rarity Rarity) (*BaseCard, error) {
+func NewCard(id string, name string, icon string, rarity Rarity, kind CardKind) (*BaseCard, error) {
 	formattedName := strings.TrimSpace(name)
 	if formattedName == "" {
 		return nil, errs.ErrCardNameRequired
@@ -60,7 +61,11 @@ func NewCard(id string, name string, icon string, rarity Rarity) (*BaseCard, err
 	}
 
 	if strings.TrimSpace(id) == "" {
-		id = NewCardID()
+		return nil, errs.ErrCardIDRequired
+	}
+
+	if !kind.IsValid() {
+		return nil, errs.ErrInvalidCardKind
 	}
 
 	return &BaseCard{
@@ -70,5 +75,14 @@ func NewCard(id string, name string, icon string, rarity Rarity) (*BaseCard, err
 		Rarity:       rarity,
 		AcquiredDate: time.Now(),
 		Level:        InitialLevel,
+		Kind:         kind,
 	}, nil
 }
+
+func (c *BaseCard) GetID() string              { return c.ID }
+func (c *BaseCard) GetName() string            { return c.Name }
+func (c *BaseCard) GetIcon() string            { return c.Icon }
+func (c *BaseCard) GetRarity() Rarity          { return c.Rarity }
+func (c *BaseCard) GetAcquiredDate() time.Time { return c.AcquiredDate }
+func (c *BaseCard) GetLevel() int              { return c.Level }
+func (c *BaseCard) GetKind() CardKind          { return c.Kind }
