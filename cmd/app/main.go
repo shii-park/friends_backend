@@ -56,6 +56,11 @@ func main() {
 	enhSvc := service.NewEnhancementService(enhRepo)
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
+	// GachaStone
+	userRepo := repository.NewUserRepository(queries)
+	gachaStoneSvc := service.NewGachaStoneService(userRepo)
+	gachaStoneHandler := handler.NewGachaStoneGinHandler(gachaStoneSvc)
+
 	r := gin.Default()
 
 	// TODO: クッキーの秘密鍵や名前の変更
@@ -82,6 +87,8 @@ func main() {
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
+
+		auth.POST("/user/:userID/gacha-stone/add", gachaStoneHandler.Add)
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)
 		auth.POST("/matching", testHandler)

@@ -13,6 +13,45 @@ import (
 	"github.com/google/uuid"
 )
 
+const addUserGachaStone = `-- name: AddUserGachaStone :one
+UPDATE users
+SET gacha_stone = gacha_stone + $1
+WHERE user_id = $2
+RETURNING gacha_stone
+`
+
+type AddUserGachaStoneParams struct {
+	Amount int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) AddUserGachaStone(ctx context.Context, arg AddUserGachaStoneParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addUserGachaStone, arg.Amount, arg.UserID)
+	var gacha_stone int32
+	err := row.Scan(&gacha_stone)
+	return gacha_stone, err
+}
+
+const consumeUserGachaStone = `-- name: ConsumeUserGachaStone :one
+UPDATE users
+SET gacha_stone = gacha_stone - $1
+WHERE user_id = $2
+  AND gacha_stone >= $1
+RETURNING gacha_stone
+`
+
+type ConsumeUserGachaStoneParams struct {
+	Amount int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) ConsumeUserGachaStone(ctx context.Context, arg ConsumeUserGachaStoneParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, consumeUserGachaStone, arg.Amount, arg.UserID)
+	var gacha_stone int32
+	err := row.Scan(&gacha_stone)
+	return gacha_stone, err
+}
+
 const createUser = `-- name: CreateUser :exec
 INSERT INTO users (
     user_id, user_name, icon_url, profile_message, birth_month, birth_day, registered_date, latest_login_date, streak_login_days, rank_point, coin, gacha_stone
