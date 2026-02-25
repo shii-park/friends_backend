@@ -20,6 +20,29 @@ const (
 	guestBirthday   = 1
 )
 
+type Rank string
+
+const (
+	RankF      Rank = "F"
+	RankE      Rank = "E"
+	RankD      Rank = "D"
+	RankC      Rank = "C"
+	RankB      Rank = "B"
+	RankA      Rank = "A"
+	RankS      Rank = "S"
+	RankLegend Rank = "Legend"
+)
+
+const (
+	RankPointFMax = 50
+	RankPointEMax = 100
+	RankPointDMax = 150
+	RankPointCMax = 200
+	RankPointBMax = 300
+	RankPointAMax = 400
+	RankPointSMax = 9999
+)
+
 type User struct {
 	ID             string `json:"userID"` // 更新しない
 	Name           string `json:"userName"`
@@ -243,6 +266,33 @@ func (u *User) ConsumeGachaStone(amount int) error {
 // ガチャ石を足す
 func (u *User) changeGachaStone(delta int) {
 	u.GachaStone += delta
+}
+
+// ランクを取得する
+func (u *User) GetRank() Rank {
+	rp := u.RankPoint
+	if rp < 0 {
+		rp = 0
+	}
+
+	switch {
+	case rp <= RankPointFMax:
+		return RankF
+	case rp <= RankPointEMax:
+		return RankE
+	case rp <= RankPointDMax:
+		return RankD
+	case rp <= RankPointCMax:
+		return RankC
+	case rp <= RankPointBMax:
+		return RankB
+	case rp <= RankPointAMax:
+		return RankA
+	case rp <= RankPointSMax:
+		return RankS
+	default:
+		return RankLegend
+	}
 }
 
 // 日付だけ取り出して4時間前にする関数
