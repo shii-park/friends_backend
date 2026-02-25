@@ -9,15 +9,15 @@ import (
 	"github.com/shii-park/friends/internal/sqlc"
 )
 
-type storageRepository struct {
+type StorageRepository struct {
 	q *sqlc.Queries
 }
 
 func NewStorageRepository(q *sqlc.Queries) domain.StorageRepository {
-	return &storageRepository{q: q}
+	return &StorageRepository{q: q}
 }
 
-func (r *storageRepository) AddCard(
+func (r *StorageRepository) AddCard(
 	ctx context.Context,
 	userID uuid.UUID,
 	instanceID uuid.UUID,
@@ -30,7 +30,7 @@ func (r *storageRepository) AddCard(
 	})
 }
 
-func (r *storageRepository) RemoveCard(
+func (r *StorageRepository) RemoveCard(
 	ctx context.Context,
 	userID uuid.UUID,
 	instanceID uuid.UUID,
@@ -48,7 +48,7 @@ func (r *storageRepository) RemoveCard(
 	return nil
 }
 
-func (r *storageRepository) ListCards(
+func (r *StorageRepository) ListCards(
 	ctx context.Context,
 	userID uuid.UUID,
 ) ([]domain.CardInstance, error) {

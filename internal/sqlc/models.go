@@ -50,6 +50,17 @@ type Equipment struct {
 	BuffEffect    sql.NullString
 }
 
+type GachaResult struct {
+	ResultID   uuid.UUID
+	UserID     uuid.UUID
+	InstanceID uuid.UUID
+	CardID     int32
+	Kind       string
+	Rarity     string
+	IsPickup   bool
+	CreatedAt  time.Time
+}
+
 type User struct {
 	UserID          uuid.UUID
 	UserName        string

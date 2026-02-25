@@ -65,6 +65,9 @@ func main() {
 	gachaStoneSvc := service.NewGachaStoneService(userRepo)
 	gachaStoneHandler := handler.NewGachaStoneGinHandler(gachaStoneSvc)
 
+	gachaSvc := service.NewGachaService(dbConn, queries, storageRepo)
+	gachaHandler := handler.NewGachaGinHandler(gachaSvc)
+
 	r := gin.Default()
 
 	// TODO: クッキーの秘密鍵や名前の変更
@@ -83,7 +86,7 @@ func main() {
 		auth.GET("/ping", testHandler)
 		auth.POST("/battle", testHandler)
 		auth.GET("/gacha/lineup", testHandler)
-		auth.POST("/gacha/draw", testHandler)
+		auth.POST("/gacha/draw", gachaHandler.Draw)
 
 		auth.GET("/storage", storageHandler.ListCards)
 		auth.POST("/storage/cards", storageHandler.AddCard)

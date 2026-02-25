@@ -61,4 +61,8 @@ var (
 
 	// ===== queue ======
 	ErrNoUsersInQueue = errors.New("キューに人がいませんでした")
+
+	// ===== Gacha =====
+	ErrInvalidGachaCount = errors.New("無効なガチャの回数です")
+	ErrInvalidGachaKind  = errors.New("無効なガチャの種類です")
 )
