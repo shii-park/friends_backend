@@ -36,7 +36,7 @@
   {
     "card_name": "暴言厨",
     "card_kind": 1,
-    "card_icon_url": "",
+    "card_icon_url": "computer_man2_angry.png",
     "rarity": "C",
     "hp": 10,
     "atk": 40,
@@ -53,7 +53,7 @@
   {
     "card_name": "プログラマー",
     "card_kind": 1,
-    "card_icon_url": "",
+    "card_icon_url": "computer_programming_woman.png",
     "rarity": "C",
     "hp": 50,
     "atk": 20,
@@ -189,7 +189,7 @@
   {
     "card_name": "番長",
     "card_kind": 1,
-    "card_icon_url": "",
+    "card_icon_url": "school_banchou.png",
     "rarity": "R",
     "hp": 50,
     "atk": 60,
@@ -393,7 +393,7 @@
   {
     "card_name": "暖かい布団の重ね方",
     "card_kind": 0,
-    "card_icon_url": "",
+    "card_icon_url": "futon_kasane_atataka.png",
     "rarity": "SR",
     "bonus_hp": 20,
     "bonus_atk": 10,

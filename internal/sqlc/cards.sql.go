@@ -7,9 +7,119 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
+
+const createCard = `-- name: CreateCard :one
+INSERT INTO cards (card_name, card_kind, card_icon_url, rarity, card_detail)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING card_id
+`
+
+type CreateCardParams struct {
+	CardName    string
+	CardKind    int16
+	CardIconUrl sql.NullString
+	Rarity      sql.NullString
+	CardDetail  sql.NullString
+}
+
+func (q *Queries) CreateCard(ctx context.Context, arg CreateCardParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createCard,
+		arg.CardName,
+		arg.CardKind,
+		arg.CardIconUrl,
+		arg.Rarity,
+		arg.CardDetail,
+	)
+	var card_id int32
+	err := row.Scan(&card_id)
+	return card_id, err
+}
+
+const createCharacter = `-- name: CreateCharacter :exec
+INSERT INTO characters (
+    character_id, card_id, hp, atk, tech,
+    init_hp, init_atk, init_tech,
+    max_hp, max_atk, max_tech, special_type
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+`
+
+type CreateCharacterParams struct {
+	CharacterID uuid.UUID
+	CardID      int32
+	Hp          int32
+	Atk         int32
+	Tech        int32
+	InitHp      int32
+	InitAtk     int32
+	InitTech    int32
+	MaxHp       int32
+	MaxAtk      int32
+	MaxTech     int32
+	SpecialType sql.NullString
+}
+
+func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams) error {
+	_, err := q.db.ExecContext(ctx, createCharacter,
+		arg.CharacterID,
+		arg.CardID,
+		arg.Hp,
+		arg.Atk,
+		arg.Tech,
+		arg.InitHp,
+		arg.InitAtk,
+		arg.InitTech,
+		arg.MaxHp,
+		arg.MaxAtk,
+		arg.MaxTech,
+		arg.SpecialType,
+	)
+	return err
+}
+
+const createEquipment = `-- name: CreateEquipment :exec
+INSERT INTO equipments (
+    equipment_id, card_id, bonus_hp, bonus_atk, bonus_tech,
+    init_bonus_hp, init_bonus_atk, init_bonus_tech,
+    max_bonus_hp, max_bonus_atk, max_bonus_tech, buff_effect
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+`
+
+type CreateEquipmentParams struct {
+	EquipmentID   uuid.UUID
+	CardID        int32
+	BonusHp       int32
+	BonusAtk      int32
+	BonusTech     int32
+	InitBonusHp   int32
+	InitBonusAtk  int32
+	InitBonusTech int32
+	MaxBonusHp    int32
+	MaxBonusAtk   int32
+	MaxBonusTech  int32
+	BuffEffect    sql.NullString
+}
+
+func (q *Queries) CreateEquipment(ctx context.Context, arg CreateEquipmentParams) error {
+	_, err := q.db.ExecContext(ctx, createEquipment,
+		arg.EquipmentID,
+		arg.CardID,
+		arg.BonusHp,
+		arg.BonusAtk,
+		arg.BonusTech,
+		arg.InitBonusHp,
+		arg.InitBonusAtk,
+		arg.InitBonusTech,
+		arg.MaxBonusHp,
+		arg.MaxBonusAtk,
+		arg.MaxBonusTech,
+		arg.BuffEffect,
+	)
+	return err
+}
 
 const getAllCharacters = `-- name: GetAllCharacters :many
 SELECT character_id, card_id, hp, atk, tech, init_hp, init_atk, init_tech, max_hp, max_atk, max_tech, special_type FROM characters
@@ -92,7 +202,7 @@ func (q *Queries) GetAllEquipments(ctx context.Context) ([]Equipment, error) {
 }
 
 const getCharacter = `-- name: GetCharacter :one
-SELECT character_id, card_id, hp, atk, tech, init_hp, init_atk, init_tech, max_hp, max_atk, max_tech, special_type FROM characters WHERE character_id=$1 LiMIT 1
+SELECT character_id, card_id, hp, atk, tech, init_hp, init_atk, init_tech, max_hp, max_atk, max_tech, special_type FROM characters WHERE character_id=$1 LIMIT 1
 `
 
 func (q *Queries) GetCharacter(ctx context.Context, characterID uuid.UUID) (Character, error) {
