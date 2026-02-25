@@ -14,6 +14,7 @@ import (
 type Card struct {
 	CardID      int32
 	CardName    string
+	CardKind    int16
 	CardIconUrl sql.NullString
 	Rarity      sql.NullString
 }
