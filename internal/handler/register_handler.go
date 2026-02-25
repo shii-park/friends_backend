@@ -18,8 +18,13 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 			Username       string `json:"userName" binding:"required"`
 			Icon           string `json:"icon,omitempty"`
 			ProfileMessage string `json:"profileMsg,omitempty"`
+<<<<<<< HEAD
 			Birthmonth     int    `json:"birthmonth,omitempty"`
 			Birthday       int    `json:"birthday,omitempty"`
+=======
+			Birthmonth     int    `json:"birthmonth" binding:"required"`
+			Birthday       int    `json:"birthday" binding:"required"`
+>>>>>>> 3f90fb091ecc1921e5a18e5de5de39081e24c14b
 		}
 
 		if err := c.ShouldBindBodyWithJSON(&json); err != nil {
