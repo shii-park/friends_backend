@@ -32,6 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("データベースのセットアップに失敗しました: %v", err)
 	}
+	log.Println("データベースのセットアップが正常に完了しました")
 	defer dbConn.Close()
 
 	queries := sqlc.New(dbConn)
