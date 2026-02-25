@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    user_id VARCHAR(255) PRIMARY KEY,
+    user_id UUID PRIMARY KEY,
     user_name VARCHAR(255) NOT NULL,
     icon_url TEXT,
     profile_message TEXT,
@@ -23,7 +23,7 @@ CREATE TABLE cards (
 
 CREATE TABLE characters (
     character_id UUID PRIMARY KEY,
-    card_id UUID UNIQUE NOT NULL REFERENCES cards(card_id) ON DELETE CASCADE,
+    card_id INTEGER UNIQUE NOT NULL REFERENCES cards(card_id) ON DELETE CASCADE,
     hp INTEGER NOT NULL,
     atk INTEGER NOT NULL,
     tech INTEGER NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE characters (
 
 CREATE TABLE equipments (
     equipment_id UUID PRIMARY KEY,
-    card_id UUID UNIQUE NOT NULL REFERENCES cards(card_id) ON DELETE CASCADE,
+    card_id INTEGER UNIQUE NOT NULL REFERENCES cards(card_id) ON DELETE CASCADE,
     bonus_hp INTEGER NOT NULL,
     bonus_atk INTEGER NOT NULL,
     bonus_tech INTEGER NOT NULL,
