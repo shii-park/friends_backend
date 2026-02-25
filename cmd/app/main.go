@@ -44,6 +44,8 @@ func main() {
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
 
+	// serviceセットアップ
+	registerSvc := service.NewRegisterService(queries)
 	storageRepo := repository.NewStorageRepository(queries)
 	storageSvc := service.NewStorageService(storageRepo)
 	storageHandler := handler.NewStorageGinHandler(storageSvc)
@@ -55,7 +57,8 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 
 	// 認証なしエンドポイント
-	r.POST("/register", handler.RegisterHandler)
+	// 新規登録
+	r.POST("/register", handler.RegisterHandler(registerSvc))
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
