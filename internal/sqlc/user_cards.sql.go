@@ -62,7 +62,7 @@ func (q *Queries) ListUserCards(ctx context.Context, userID uuid.UUID) ([]ListUs
 	return items, nil
 }
 
-const removeUserCard = `-- name: RemoveUserCard :exec
+const removeUserCard = `-- name: RemoveUserCard :execrows
 DELETE FROM user_cards
 WHERE user_id = $1 AND instance_id = $2
 `
@@ -72,7 +72,10 @@ type RemoveUserCardParams struct {
 	InstanceID uuid.UUID
 }
 
-func (q *Queries) RemoveUserCard(ctx context.Context, arg RemoveUserCardParams) error {
-	_, err := q.db.ExecContext(ctx, removeUserCard, arg.UserID, arg.InstanceID)
-	return err
+func (q *Queries) RemoveUserCard(ctx context.Context, arg RemoveUserCardParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, removeUserCard, arg.UserID, arg.InstanceID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }

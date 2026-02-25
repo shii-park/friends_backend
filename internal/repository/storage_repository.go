@@ -1,10 +1,11 @@
-package db
+package repository
 
 import (
 	"context"
 
 	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/domain"
+	"github.com/shii-park/friends/internal/errs"
 	"github.com/shii-park/friends/internal/sqlc"
 )
 
@@ -34,10 +35,17 @@ func (r *storageRepository) RemoveCard(
 	userID uuid.UUID,
 	instanceID uuid.UUID,
 ) error {
-	return r.q.RemoveUserCard(ctx, sqlc.RemoveUserCardParams{
+	rows, err := r.q.RemoveUserCard(ctx, sqlc.RemoveUserCardParams{
 		UserID:     userID,
 		InstanceID: instanceID,
 	})
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return errs.ErrCardNotFound
+	}
+	return nil
 }
 
 func (r *storageRepository) ListCards(

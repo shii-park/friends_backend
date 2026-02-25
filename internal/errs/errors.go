@@ -6,6 +6,7 @@ var (
 	// ===== User =====
 	ErrUserNameRequired       = errors.New("ユーザー名は必須です")
 	ErrUserNotFound           = errors.New("ユーザーが存在しません")
+	ErrInvalidUserID          = errors.New("無効なユーザーIDです")
 	ErrInvalidBirthday        = errors.New("無効な日付です")
 	ErrInvalidRankPointDelta  = errors.New("無効なランクポイントの増加量です")
 	ErrInvalidRankPoint       = errors.New("無効なランクポイントです")
@@ -38,8 +39,8 @@ var (
 	ErrInvalidCharaLevel       = errors.New("不正なレベルです")
 
 	// ===== Equip =====
-	ErrEquipIDRequired       = errors.New("キャラクターIDは必須です")
-	ErrInvalidEquipID        = errors.New("無効なキャラクターIDです")
+	ErrEquipIDRequired       = errors.New("装備IDは必須です")
+	ErrInvalidEquipID        = errors.New("無効な装備IDです")
 	ErrInvalidEquipHP        = errors.New("無効な付加HPです")
 	ErrInvalidEquipATK       = errors.New("無効な付加ATKです")
 	ErrInvalidEquipTECH      = errors.New("無効な付加TECKです")

@@ -13,6 +13,7 @@ import (
 	"github.com/shii-park/friends/internal/db"
 	"github.com/shii-park/friends/internal/handler"
 	"github.com/shii-park/friends/internal/middleware"
+	"github.com/shii-park/friends/internal/repository"
 	"github.com/shii-park/friends/internal/service"
 	"github.com/shii-park/friends/internal/sqlc"
 )
@@ -45,10 +46,13 @@ func main() {
 
 	// serviceセットアップ
 	registerSvc := service.NewRegisterService(queries)
+	storageRepo := repository.NewStorageRepository(queries)
+	storageSvc := service.NewStorageService(storageRepo)
+	storageHandler := handler.NewStorageGinHandler(storageSvc)
 
 	r := gin.Default()
 
-	//TODO: クッキーの秘密鍵や名前の変更
+	// TODO: クッキーの秘密鍵や名前の変更
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 
@@ -62,27 +66,22 @@ func main() {
 	{
 		// TODO:以下は動作検証用エンドポイントなので後で削除
 		auth.GET("/ping", testHandler)
-		// バトルスタート
 		auth.POST("/battle", testHandler)
-		// ガチャのラインナップを取得
 		auth.GET("/gacha/lineup", testHandler)
-		// ガチャを引く
 		auth.POST("/gacha/draw", testHandler)
-		// ストレージの内容を取得
-		auth.GET("/storage", testHandler)
-		// ユーザー情報を取得
+
+		auth.GET("/storage", storageHandler.ListCards)
+		auth.POST("/storage/cards", storageHandler.AddCard)
+		auth.DELETE("/storage/cards/:instanceID", storageHandler.RemoveCard)
+
 		auth.GET("/user/:userID/get", testHandler)
-		// ユーザー情報を削除
 		auth.DELETE("/user/:userID/delete", testHandler)
-		// ユーザー名を更新
 		auth.PUT("/user/:userID/update", testHandler)
-		// カードを強化する
 		auth.POST("/card/:cardID/upgrade", testHandler)
-		// マッチング部屋に参加
 		auth.POST("/matching", testHandler)
 	}
 
-	//ポート8080番でリッスン
+	// ポート8080番でリッスン
 	r.Run()
 }
 
