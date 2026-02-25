@@ -50,7 +50,7 @@ type BaseCard struct {
 	Kind         CardKind  `json:"cardKind"`
 }
 
-func NewCard(id string, name string, icon string, rarity Rarity, kind CardKind) (*BaseCard, error) {
+func NewBaseCard(id string, name string, icon string, rarity Rarity, kind CardKind) (*BaseCard, error) {
 	formattedName := strings.TrimSpace(name)
 	if formattedName == "" {
 		return nil, errs.ErrCardNameRequired

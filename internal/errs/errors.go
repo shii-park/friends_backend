@@ -18,4 +18,15 @@ var (
 	ErrCardNameRequired  = errors.New("カード名は必須です")
 	ErrInvalidCardRarity = errors.New("無効なカードのレア度です")
 	ErrInvalidCardKind   = errors.New("無効なカードの種類です")
+
+	// ===== Chara =====
+	ErrCharaIDRequired         = errors.New("キャラクターIDは必須です")
+	ErrInvalidCharaID          = errors.New("無効なキャラクターIDです")
+	ErrInvalidCharacterHP      = errors.New("無効なHPです")
+	ErrInvalidCharacterATK     = errors.New("無効なATKです")
+	ErrInvalidCharacterTECH    = errors.New("無効なTECKです")
+	ErrInvalidCharacterMaxHP   = errors.New("無効な最大HPです")
+	ErrInvalidCharacterMaxATK  = errors.New("無効な最大ATKです")
+	ErrInvalidCharacterMaxTECH = errors.New("無効な最大TECKです")
+	ErrInvalidSpecialType      = errors.New("無効な必殺技の種類です")
 )
