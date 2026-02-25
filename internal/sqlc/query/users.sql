@@ -1,10 +1,9 @@
--- ゲッター系 
+-- User系
 
 -- name: GetUser :one
 SELECT * FROM users
 WHERE user_id = sqlc.arg(user_id) LIMIT 1;
 
--- 作成系 
 
 -- name: CreateUser :exec
 INSERT INTO users (
@@ -13,7 +12,9 @@ INSERT INTO users (
     sqlc.arg(user_id), sqlc.arg(user_name), sqlc.arg(icon_url), sqlc.arg(profile_message), sqlc.arg(birth_month), sqlc.arg(birth_day), sqlc.arg(latest_login_date), sqlc.arg(streak_login_days)
 );
 
--- 
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE user_id = sqlc.arg(user_id);
 
 -- name: UpdateUserCoin :exec
 UPDATE users
@@ -29,3 +30,4 @@ WHERE user_id = sqlc.arg(user_id);
 UPDATE users
 SET rank_point = sqlc.arg(rank_point)
 WHERE user_id = sqlc.arg(user_id);
+

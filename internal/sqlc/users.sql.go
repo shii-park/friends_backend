@@ -11,7 +11,6 @@ import (
 )
 
 const createUser = `-- name: CreateUser :exec
-
 INSERT INTO users (
     user_id, user_name, icon_url, profile_message, birth_month, birth_day, latest_login_date, streak_login_days
 ) VALUES (
@@ -30,7 +29,6 @@ type CreateUserParams struct {
 	StreakLoginDays int32
 }
 
-// 作成系
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	_, err := q.db.ExecContext(ctx, createUser,
 		arg.UserID,
@@ -45,13 +43,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, userID)
+	return err
+}
+
 const getUser = `-- name: GetUser :one
 
 SELECT user_id, user_name, icon_url, profile_message, birth_month, birth_day, latest_login_date, streak_login_days, registered_date, coin, gacha_stone, rank_point FROM users
 WHERE user_id = $1 LIMIT 1
 `
 
-// ゲッター系
+// User系
 func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, userID)
 	var i User
@@ -73,7 +81,6 @@ func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
 }
 
 const updateUserCoin = `-- name: UpdateUserCoin :exec
-
 UPDATE users
 SET coin = $1
 WHERE user_id = $2
