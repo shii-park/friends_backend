@@ -11,10 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/shii-park/friends/internal/db"
-	"github.com/shii-park/friends/internal/sqlc"
-
 	"github.com/shii-park/friends/internal/handler"
 	"github.com/shii-park/friends/internal/middleware"
+	"github.com/shii-park/friends/internal/service"
+	"github.com/shii-park/friends/internal/sqlc"
 )
 
 func main() {
@@ -43,6 +43,9 @@ func main() {
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
 
+	// serviceセットアップ
+	registerSvc := service.NewRegisterService(queries)
+
 	r := gin.Default()
 
 	//TODO: クッキーの秘密鍵や名前の変更
@@ -51,7 +54,7 @@ func main() {
 
 	// 認証なしエンドポイント
 	// 新規登録
-	r.POST("/register", handler.RegisterHandler(queries))
+	r.POST("/register", handler.RegisterHandler(registerSvc))
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
