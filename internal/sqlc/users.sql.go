@@ -8,15 +8,16 @@ package sqlc
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :exec
 INSERT INTO users (
-    user_id, user_name, icon_url, profile_message, birth_month, birth_day, latest_login_date, streak_login_days
+    user_id, user_name, icon_url, profile_message, birth_month, birth_day, registered_date, latest_login_date, streak_login_days, rank_point, coin, gacha_stone
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9,  $10, $11, $12
 )
 `
 
@@ -27,8 +28,12 @@ type CreateUserParams struct {
 	ProfileMessage  sql.NullString
 	BirthMonth      sql.NullInt16
 	BirthDay        sql.NullInt16
+	RegisteredDate  time.Time
 	LatestLoginDate sql.NullTime
 	StreakLoginDays int32
+	RankPoint       int32
+	Coin            int32
+	GachaStone      int32
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
@@ -39,8 +44,12 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.ProfileMessage,
 		arg.BirthMonth,
 		arg.BirthDay,
+		arg.RegisteredDate,
 		arg.LatestLoginDate,
 		arg.StreakLoginDays,
+		arg.RankPoint,
+		arg.Coin,
+		arg.GachaStone,
 	)
 	return err
 }
