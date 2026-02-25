@@ -56,8 +56,12 @@ func main() {
 	enhSvc := service.NewEnhancementService(enhRepo)
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
-	// GachaStone
+	// User
 	userRepo := repository.NewUserRepository(queries)
+
+	coinSvc := service.NewCoinService(userRepo)
+	coinHandler := handler.NewCoinGinHandler(coinSvc)
+
 	gachaStoneSvc := service.NewGachaStoneService(userRepo)
 	gachaStoneHandler := handler.NewGachaStoneGinHandler(gachaStoneSvc)
 
@@ -88,6 +92,7 @@ func main() {
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
 
+		auth.POST("/user/:userID/coin/add", coinHandler.Add)
 		auth.POST("/user/:userID/gacha-stone/add", gachaStoneHandler.Add)
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)

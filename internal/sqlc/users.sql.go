@@ -13,6 +13,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const addUserCoin = `-- name: AddUserCoin :one
+UPDATE users
+SET coin = coin + $1
+WHERE user_id = $2
+RETURNING coin
+`
+
+type AddUserCoinParams struct {
+	Amount int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) AddUserCoin(ctx context.Context, arg AddUserCoinParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addUserCoin, arg.Amount, arg.UserID)
+	var coin int32
+	err := row.Scan(&coin)
+	return coin, err
+}
+
 const addUserGachaStone = `-- name: AddUserGachaStone :one
 UPDATE users
 SET gacha_stone = gacha_stone + $1
@@ -30,6 +49,26 @@ func (q *Queries) AddUserGachaStone(ctx context.Context, arg AddUserGachaStonePa
 	var gacha_stone int32
 	err := row.Scan(&gacha_stone)
 	return gacha_stone, err
+}
+
+const consumeUserCoin = `-- name: ConsumeUserCoin :one
+UPDATE users
+SET coin = coin - $1
+WHERE user_id = $2
+  AND coin >= $1
+RETURNING coin
+`
+
+type ConsumeUserCoinParams struct {
+	Amount int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) ConsumeUserCoin(ctx context.Context, arg ConsumeUserCoinParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, consumeUserCoin, arg.Amount, arg.UserID)
+	var coin int32
+	err := row.Scan(&coin)
+	return coin, err
 }
 
 const consumeUserGachaStone = `-- name: ConsumeUserGachaStone :one
