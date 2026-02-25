@@ -42,7 +42,6 @@ func main() {
 
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
-	_ = queries // 未使用によるコンパイルエラー回避のために一時的に代入しています．クエリが必要になった時に，queriesからもらってください．その際にこの行は削除してください．
 
 	r := gin.Default()
 
@@ -52,7 +51,7 @@ func main() {
 
 	// 認証なしエンドポイント
 	// 新規登録
-	r.POST("/register", handler.RegisterHandler)
+	r.POST("/register", handler.RegisterHandler(queries))
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
