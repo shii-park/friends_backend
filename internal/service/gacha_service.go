@@ -115,21 +115,26 @@ func (s *GachaService) Draw(ctx context.Context, userID uuid.UUID, count int) (n
 }
 
 func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
-	if s.randPct() < 40.0 {
+	r := s.randPct()
+
+	if r < 40.0 {
 		kind = "character"
-		r := s.randPct()
+
+		rc := r
+
 		switch {
-		case r < 21.25:
+		case rc < 21.25:
 			rarity = "C"
-		case r < 21.25+10.0:
+		case rc < 21.25+10.0:
 			rarity = "UC"
-		case r < 21.25+10.0+5.0:
+		case rc < 21.25+10.0+5.0:
 			rarity = "R"
-		case r < 21.25+10.0+5.0+2.5:
+		case rc < 21.25+10.0+5.0+2.5:
 			rarity = "SR"
 		default:
 			rarity = "SSR"
 		}
+
 		if rarity == "SSR" {
 			isPickup = s.randPct() < 60.0
 		}
@@ -137,19 +142,21 @@ func (s *GachaService) roll() (kind string, rarity string, isPickup bool) {
 	}
 
 	kind = "equip"
-	r := s.randPct()
+	re := r - 40.0
+
 	switch {
-	case r < 31.875:
+	case re < 31.875:
 		rarity = "C"
-	case r < 31.875+15.0:
+	case re < 31.875+15.0:
 		rarity = "UC"
-	case r < 31.875+15.0+7.5:
+	case re < 31.875+15.0+7.5:
 		rarity = "R"
-	case r < 31.875+15.0+7.5+3.75:
+	case re < 31.875+15.0+7.5+3.75:
 		rarity = "SR"
 	default:
 		rarity = "SSR"
 	}
+
 	return
 }
 
