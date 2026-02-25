@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -59,7 +60,8 @@ func main() {
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
 	r := gin.Default()
-
+	// TODO: 余裕があればCORS設定
+	r.Use(cors.Default())
 	// TODO: クッキーの秘密鍵や名前の変更
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
