@@ -187,3 +187,5 @@ func calcLinearStat(init int, max int, level int) int {
 	step := (max - init) / denom
 	return init + step*(level-1)
 }
+
+func (c *Character) GetLevel() int { return c.Level }

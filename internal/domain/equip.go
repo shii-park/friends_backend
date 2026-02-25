@@ -166,3 +166,5 @@ func calcLinearBonus(init int, max int, level int) int {
 	step := (max - init) / denom
 	return init + step*(level-1)
 }
+
+func (e *Equip) GetLevel() int { return e.Level }

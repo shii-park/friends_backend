@@ -46,9 +46,15 @@ func main() {
 
 	// serviceセットアップ
 	registerSvc := service.NewRegisterService(queries)
+	// Storage
 	storageRepo := repository.NewStorageRepository(queries)
 	storageSvc := service.NewStorageService(storageRepo)
 	storageHandler := handler.NewStorageGinHandler(storageSvc)
+
+	// Enhancement
+	enhRepo := repository.NewEnhancementRepository(dbConn, queries)
+	enhSvc := service.NewEnhancementService(enhRepo)
+	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
 	r := gin.Default()
 
@@ -76,8 +82,9 @@ func main() {
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
+
 		auth.PUT("/user/:userID/update", testHandler)
-		auth.POST("/card/:cardID/upgrade", testHandler)
+		auth.POST("/card/:instanceID/enhacement", enhHandler.Enhance)
 		auth.POST("/matching", testHandler)
 	}
 
