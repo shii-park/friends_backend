@@ -24,4 +24,9 @@ type StorageRepository interface {
 		ctx context.Context,
 		userID uuid.UUID,
 	) ([]CardInstance, error)
+
+	ListCardDetails(
+		ctx context.Context,
+		userID uuid.UUID,
+	) ([]CardInstanceDetail, error)
 }
