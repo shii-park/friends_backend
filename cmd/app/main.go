@@ -65,6 +65,7 @@ func main() {
 	// 認証なしエンドポイント
 	// 新規登録
 	r.POST("/register", handler.RegisterHandler(registerSvc))
+
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
 	auth.Use(middleware.AuthRequired())
