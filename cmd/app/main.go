@@ -76,6 +76,8 @@ func main() {
 		auth.PUT("/user/:userID/update", testHandler)
 		// カードを強化する
 		auth.POST("/card/:cardID/upgrade", testHandler)
+		// マッチング部屋に参加
+		auth.POST("/matching", testHandler)
 	}
 
 	//ポート8080番でリッスン
