@@ -16,6 +16,7 @@ CREATE TABLE users (
 CREATE TABLE cards (
     card_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     card_name VARCHAR(255) NOT NULL,
+    card_kind SMALLINT NOT NULL,
     card_icon_url TEXT,
     rarity VARCHAR(3) CHECK (rarity IN ('C', 'UC', 'R', 'SR', 'SSR'))
 );
