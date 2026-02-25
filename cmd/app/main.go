@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -93,8 +92,6 @@ func main() {
 	auth := r.Group("/")
 	auth.Use(middleware.AuthRequired())
 	{
-		// TODO:以下は動作検証用エンドポイントなので後で削除
-		auth.GET("/ping", testHandler)
 		auth.GET("/battle/ws", battleHandler.WS)
 		auth.GET("/gacha/characters", gachaHandler.ListCharacters)
 		auth.GET("/gacha/equipments", gachaHandler.ListEquipments)
@@ -107,13 +104,12 @@ func main() {
 		auth.GET("/storage/detail", storageHandler.ListCardDetails)
 
 		auth.GET("/user/:userID/get", handler.GetUserHandler(getUserSvc))
-		auth.DELETE("/user/:userID/delete", testHandler)
 
 		auth.POST("/user/:userID/coin/add", coinHandler.Add)
 		auth.POST("/user/:userID/gacha-stone/add", gachaStoneHandler.Add)
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)
-		auth.POST("/matching", testHandler)
+		// auth.POST("/matching", testHandler)
 	}
 
 	// ポート8080番でリッスン
@@ -121,6 +117,6 @@ func main() {
 }
 
 // TODO: すべてのハンドラーが完成したら以下を削除
-func testHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "ok"})
-}
+// func testHandler(c *gin.Context) {
+// 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+// }
