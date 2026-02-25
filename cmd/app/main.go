@@ -72,6 +72,10 @@ func main() {
 	gachaSvc := service.NewGachaService(dbConn, queries, gachaRepo, storageRepo)
 	gachaHandler := handler.NewGachaGinHandler(gachaSvc)
 
+	collectionRepo := repository.NewCollectionRepository(queries)
+	collectionSvc := service.NewCollectionService(collectionRepo)
+	collectionHandler := handler.NewCollectionGinHandler(collectionSvc)
+
 	r := gin.Default()
 	// TODO: 余裕があればCORS設定
 	r.Use(cors.New(cors.Config{
@@ -110,6 +114,7 @@ func main() {
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)
 		auth.GET("/card/:instanceID/detail", storageHandler.Detail)
+		auth.GET("/collection", collectionHandler.List)
 		// auth.POST("/matching", testHandler)
 	}
 
