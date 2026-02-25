@@ -122,7 +122,7 @@ func NewCharacter(
 
 func (c *Character) AddHP(delta int) error {
 	if delta <= 0 {
-		return errs.ErrInvalidCharacterHPDelta
+		return errs.ErrInvalidCharaHPDelta
 	}
 	c.HP += delta
 	if c.HP > c.MaxHP {
@@ -133,7 +133,7 @@ func (c *Character) AddHP(delta int) error {
 
 func (c *Character) AddATK(delta int) error {
 	if delta <= 0 {
-		return errs.ErrInvalidCharacterATKDelta
+		return errs.ErrInvalidCharaATKDelta
 	}
 	c.ATK += delta
 	if c.ATK > c.MaxATK {
@@ -144,7 +144,7 @@ func (c *Character) AddATK(delta int) error {
 
 func (c *Character) AddTECH(delta int) error {
 	if delta <= 0 {
-		return errs.ErrInvalidCharacterTECHDelta
+		return errs.ErrInvalidCharaTECHDelta
 	}
 	c.TECH += delta
 	if c.TECH > c.MaxTECH {
@@ -155,14 +155,14 @@ func (c *Character) AddTECH(delta int) error {
 
 func (c *Character) LevelUp() error {
 	if c.Level >= MaxLevel {
-		return errs.ErrCharacterAlreadyMaxLevel
+		return errs.ErrCharaAlreadyMaxLevel
 	}
 	return c.SetLevel(c.Level + 1)
 }
 
 func (c *Character) SetLevel(level int) error {
 	if level < 1 || level > MaxLevel {
-		return errs.ErrInvalidCharacterLevel
+		return errs.ErrInvalidCharaLevel
 	}
 
 	c.Level = level

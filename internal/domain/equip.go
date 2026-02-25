@@ -100,3 +100,70 @@ func NewEquip(
 		BuffEffect: buff,
 	}, nil
 }
+
+func (e *Equip) AddBonusHP(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidEquipHPDelta
+	}
+	e.BonusHP += delta
+	if e.BonusHP > e.MaxBonusHP {
+		e.BonusHP = e.MaxBonusHP
+	}
+	return nil
+}
+
+func (e *Equip) AddBonusATK(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidEquipATKDelta
+	}
+	e.BonusATK += delta
+	if e.BonusATK > e.MaxBonusATK {
+		e.BonusATK = e.MaxBonusATK
+	}
+	return nil
+}
+
+func (e *Equip) AddBonusTECH(delta int) error {
+	if delta <= 0 {
+		return errs.ErrInvalidEquipTECHDelta
+	}
+	e.BonusTECH += delta
+	if e.BonusTECH > e.MaxBonusTECH {
+		e.BonusTECH = e.MaxBonusTECH
+	}
+	return nil
+}
+
+// レベルアップ
+func (e *Equip) LevelUp() error {
+	if e.Level >= MaxLevel {
+		return errs.ErrEquipAlreadyMaxLevel
+	}
+	return e.SetLevel(e.Level + 1)
+}
+
+func (e *Equip) SetLevel(level int) error {
+	if level < 1 || level > MaxLevel {
+		return errs.ErrInvalidEquipLevel
+	}
+
+	e.Level = level
+
+	e.BonusHP = calcLinearBonus(e.InitBonusHP, e.MaxBonusHP, level)
+	e.BonusATK = calcLinearBonus(e.InitBonusATK, e.MaxBonusATK, level)
+	e.BonusTECH = calcLinearBonus(e.InitBonusTECH, e.MaxBonusTECH, level)
+
+	return nil
+}
+
+func calcLinearBonus(init int, max int, level int) int {
+	if level <= 1 {
+		return init
+	}
+	if level >= MaxLevel {
+		return max
+	}
+	denom := MaxLevel - 1
+	step := (max - init) / denom
+	return init + step*(level-1)
+}
