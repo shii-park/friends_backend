@@ -16,11 +16,13 @@ var (
 	ErrInsufficientGachaStone = errors.New("ガチャ石の量が不十分です")
 
 	// ===== Card =====
-	ErrCardIDRequired    = errors.New("カードIDは必須です")
-	ErrCardNameRequired  = errors.New("カード名は必須です")
-	ErrInvalidCardID     = errors.New("無効なカードIDです")
-	ErrInvalidCardRarity = errors.New("無効なカードのレア度です")
-	ErrInvalidCardKind   = errors.New("無効なカードの種類です")
+	ErrCardIDRequired      = errors.New("カードIDは必須です")
+	ErrCardNameRequired    = errors.New("カード名は必須です")
+	ErrInvalidCardID       = errors.New("無効なカードIDです")
+	ErrInvalidCardRarity   = errors.New("無効なカードのレア度です")
+	ErrInvalidCardKind     = errors.New("無効なカードの種類です")
+	ErrInvalidEnhanceTimes = errors.New("無効な強化レベルです")
+	ErrInvalidEnhanceCost  = errors.New("無効な強化コストの値です")
 
 	// ===== Chara =====
 	ErrCharaIDRequired         = errors.New("キャラクターIDは必須です")
