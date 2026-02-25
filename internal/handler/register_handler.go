@@ -6,13 +6,16 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/errs"
 	"github.com/shii-park/friends/internal/service"
 )
 
+const initialCardID = 4
+
 // RegisterHandler はユーザー新規登録を処理するハンドラーです
 // ユーザー情報をデータベースに保存し，セッションを保存します．
-func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
+func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var json struct {
 			Username       string `json:"userName" binding:"required"`
@@ -35,6 +38,19 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			}
+			return
+		}
+
+		// 初期カードをDBに保存
+		userUUID, err := uuid.Parse(user.ID)
+		if err != nil {
+			_ = svc.DeleteUser(c.Request.Context(), user.ID)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
+			return
+		}
+		if _, err := storageSvc.AddCard(c.Request.Context(), userUUID, initialCardID); err != nil {
+			_ = svc.DeleteUser(c.Request.Context(), user.ID)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			return
 		}
 
