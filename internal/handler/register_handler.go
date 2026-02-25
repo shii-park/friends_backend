@@ -30,6 +30,13 @@ func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageSer
 			return
 		}
 
+		if json.Birthmonth == 0 {
+			json.Birthmonth = 1
+		}
+		if json.Birthday == 0 {
+			json.Birthday = 1
+		}
+
 		// DBにユーザーデータを保存
 		user, err := svc.RegisterUser(c.Request.Context(), json.Username, json.Icon, json.ProfileMessage, json.Birthmonth, json.Birthday)
 		if err != nil {
