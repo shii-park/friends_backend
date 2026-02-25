@@ -11,7 +11,7 @@ import (
 //
 //	dsn = "host=127.0.0.1 port=5432 user=user password=password dbname=dbname sslmode=disable"
 func Setup(dbDriver string, host string, port int, user string, password string, dbname string, sslmode string) (*sql.DB, error) {
-	dsn := "host=" + host + " port=" + strconv.Itoa(port) + " user=" + user + " dbname=" + dbname + " sslmode=" + sslmode
+	dsn := "host=" + host + " port=" + strconv.Itoa(port) + " user=" + user + " password=" + password + " dbname=" + dbname + " sslmode=" + sslmode
 	db, err := sql.Open(dbDriver, dsn)
 	if err != nil {
 		return nil, err

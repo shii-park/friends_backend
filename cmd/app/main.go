@@ -1,20 +1,38 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/shii-park/friends/internal/db"
 	"github.com/shii-park/friends/internal/sqlc"
 )
 
 func main() {
-	// DBのセットアップ
-	dbConn, err := db.Setup("postgre", "db", 2556, "user", "password", "dbname", "disable")
-	if err != nil {
-		fmt.Errorf("データベースのセットアップに失敗しました: %w", err)
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
 	}
+
+	// DBのセットアップ
+	port, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	dbConn, err := db.Setup(
+		os.Getenv("DB_DRIVER"),
+		os.Getenv("DB_HOST"),
+		port,
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("SSLMODE"),
+	)
+	if err != nil {
+		log.Fatalf("データベースのセットアップに失敗しました: %v", err)
+	}
+	defer dbConn.Close()
 
 	queries := sqlc.New(dbConn)
 	r := gin.Default()
