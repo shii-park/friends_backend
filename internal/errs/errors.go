@@ -51,6 +51,7 @@ var (
 	ErrInvalidEquipTECHDelta = errors.New("無効なTECHの増加量です")
 	ErrEquipAlreadyMaxLevel  = errors.New("既に最大レベルです")
 	ErrInvalidEquipLevel     = errors.New("不正なレベルです")
+	ErrInvalidInstanceID     = errors.New("無効なInstanceIDです")
 	ErrStorageNil            = errors.New("ストレージには何もありません")
 	ErrCardAlreadyHas        = errors.New("既に所持しているカードです")
 	ErrCardNotFound          = errors.New("カードが見つかりません")

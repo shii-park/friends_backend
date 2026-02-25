@@ -1,103 +1,111 @@
 package domain
 
 import (
+	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/errs"
 )
 
-// 型定義
+// CardInstance 所持カード1枚を表す
+type CardInstance struct {
+	InstanceID uuid.UUID
+	CardID     int
+}
 
-// Storage はユーザーの所持カード一覧
-// instanceの概念は無く、card_id の集合として管理する
+// Storage ユーザーの所持カード一覧
 type Storage struct {
 	UserID string
 
-	// 所持カード
-	cards map[string]struct{}
+	// instanceID → CardInstance
+	cards map[uuid.UUID]CardInstance
 }
 
 // NewEmptyStorage 新規作成（空）
 func NewEmptyStorage(userID string) *Storage {
 	return &Storage{
 		UserID: userID,
-		cards:  make(map[string]struct{}),
+		cards:  make(map[uuid.UUID]CardInstance),
 	}
 }
 
 // ReconstructStorage DBから復元
-func ReconstructStorage(
-	userID string,
-	cardIDs []string,
-) *Storage {
-	m := make(map[string]struct{}, len(cardIDs))
-
-	for _, id := range cardIDs {
-		m[id] = struct{}{}
+func ReconstructStorage(userID string, cardInstances []CardInstance) *Storage {
+	m := make(map[uuid.UUID]CardInstance, len(cardInstances))
+	for _, ci := range cardInstances {
+		m[ci.InstanceID] = ci
 	}
-
 	return &Storage{
 		UserID: userID,
 		cards:  m,
 	}
 }
 
-// Add Card追加
-// 既に持っていたらエラー
-func (s *Storage) Add(cardID string) error {
+// Add Card追加（instanceID を新規生成して追加）
+func (s *Storage) Add(cardID int) (CardInstance, error) {
 	if s == nil {
-		return errs.ErrStorageNil
+		return CardInstance{}, errs.ErrStorageNil
+	}
+	if cardID <= 0 {
+		return CardInstance{}, errs.ErrInvalidCardID
 	}
 
-	if cardID == "" {
-		return errs.ErrInvalidCardID
+	instanceID := uuid.New()
+
+	ci := CardInstance{
+		InstanceID: instanceID,
+		CardID:     cardID,
 	}
 
-	if s.Has(cardID) {
-		return errs.ErrCardAlreadyHas
-	}
-
-	s.cards[cardID] = struct{}{}
-
-	return nil
+	s.cards[instanceID] = ci
+	return ci, nil
 }
 
-// Remove Card削除
-func (s *Storage) Remove(cardID string) error {
+// Remove InstanceIDで削除
+func (s *Storage) Remove(instanceID uuid.UUID) error {
 	if s == nil {
 		return errs.ErrStorageNil
 	}
-
-	if !s.Has(cardID) {
+	if instanceID == uuid.Nil {
+		return errs.ErrInvalidInstanceID
+	}
+	if _, ok := s.cards[instanceID]; !ok {
 		return errs.ErrCardNotFound
 	}
-
-	delete(s.cards, cardID)
-
+	delete(s.cards, instanceID)
 	return nil
 }
 
-// Has 所持確認
-func (s *Storage) Has(cardID string) bool {
+// Has InstanceID存在確認
+func (s *Storage) Has(instanceID uuid.UUID) bool {
 	if s == nil {
 		return false
 	}
-
-	_, ok := s.cards[cardID]
-
+	_, ok := s.cards[instanceID]
 	return ok
 }
 
-// AllList 一覧取得
-func (s *Storage) AllList() []string {
+// FindByCardID cardIDで検索
+func (s *Storage) FindByCardID(cardID int) []CardInstance {
 	if s == nil {
 		return nil
 	}
-
-	result := make([]string, 0, len(s.cards))
-
-	for id := range s.cards {
-		result = append(result, id)
+	result := []CardInstance{}
+	for _, v := range s.cards {
+		if v.CardID == cardID {
+			result = append(result, v)
+		}
 	}
+	return result
+}
 
+// AllList 一覧取得
+func (s *Storage) AllList() []CardInstance {
+	if s == nil {
+		return nil
+	}
+	result := make([]CardInstance, 0, len(s.cards))
+	for _, v := range s.cards {
+		result = append(result, v)
+	}
 	return result
 }
 
@@ -106,6 +114,5 @@ func (s *Storage) AllCount() int {
 	if s == nil {
 		return 0
 	}
-
 	return len(s.cards)
 }
