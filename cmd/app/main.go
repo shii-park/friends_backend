@@ -49,6 +49,8 @@ func main() {
 	storageRepo := repository.NewStorageRepository(queries)
 	storageSvc := service.NewStorageService(storageRepo)
 	storageHandler := handler.NewStorageGinHandler(storageSvc)
+	battleSvc := service.NewBattleService(queries)
+	battleHandler := handler.NewBattleGinHandler(battleSvc)
 
 	r := gin.Default()
 
@@ -66,7 +68,7 @@ func main() {
 	{
 		// TODO:以下は動作検証用エンドポイントなので後で削除
 		auth.GET("/ping", testHandler)
-		auth.POST("/battle", testHandler)
+		auth.GET("/battle/ws", battleHandler.WS)
 		auth.GET("/gacha/lineup", testHandler)
 		auth.POST("/gacha/draw", testHandler)
 
