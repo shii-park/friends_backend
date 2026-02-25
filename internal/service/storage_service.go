@@ -14,6 +14,7 @@ type StorageService interface {
 	ListCards(ctx context.Context, userID uuid.UUID) ([]domain.CardInstance, error)
 
 	ListCardDetails(ctx context.Context, userID uuid.UUID) ([]domain.CardInstanceDetail, error)
+	GetCardDetail(ctx context.Context, userID, instanceID uuid.UUID) (domain.CardInstanceDetail, error)
 }
 
 type storageService struct {
@@ -65,4 +66,14 @@ func (s *storageService) ListCardDetails(ctx context.Context, userID uuid.UUID) 
 		return nil, errs.ErrInvalidUserID
 	}
 	return s.repo.ListCardDetails(ctx, userID)
+}
+
+func (s *storageService) GetCardDetail(ctx context.Context, userID, instanceID uuid.UUID) (domain.CardInstanceDetail, error) {
+	if userID == uuid.Nil {
+		return domain.CardInstanceDetail{}, errs.ErrInvalidUserID
+	}
+	if instanceID == uuid.Nil {
+		return domain.CardInstanceDetail{}, errs.ErrInvalidInstanceID
+	}
+	return s.repo.GetCardDetail(ctx, userID, instanceID)
 }

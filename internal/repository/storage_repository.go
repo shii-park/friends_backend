@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/shii-park/friends/internal/domain"
@@ -157,7 +158,6 @@ func (r *StorageRepository) ListCardDetails(
 				BonusATK:  batk,
 				BonusTECH: btech,
 
-				// ★ これを追加（init/max を返す）
 				InitBonusHP:   int(row.EqInitBonusHp.Int32),
 				InitBonusATK:  int(row.EqInitBonusAtk.Int32),
 				InitBonusTECH: int(row.EqInitBonusTech.Int32),
@@ -180,4 +180,92 @@ func nullInt16ToInt(v sql.NullInt16, def int) int {
 		return int(v.Int16)
 	}
 	return def
+}
+
+func (r *StorageRepository) GetCardDetail(
+	ctx context.Context,
+	userID uuid.UUID,
+	instanceID uuid.UUID,
+) (domain.CardInstanceDetail, error) {
+	row, err := r.q.GetUserCardDetail(ctx, sqlc.GetUserCardDetailParams{
+		UserID:     userID,
+		InstanceID: instanceID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.CardInstanceDetail{}, errs.ErrCardNotFound
+		}
+		return domain.CardInstanceDetail{}, err
+	}
+
+	level := nullInt16ToInt(row.Level, 1)
+
+	item := domain.CardInstanceDetail{
+		InstanceID: row.InstanceID,
+		Level:      level,
+		Card: domain.CardMaster{
+			CardID:      int(row.CardID),
+			CardName:    row.CardName,
+			CardKind:    row.CardKind,
+			Rarity:      row.Rarity.String,
+			CardIconURL: row.CardIconUrl.String,
+		},
+	}
+
+	if row.CharacterID.Valid {
+		initHP := int(row.ChInitHp.Int32)
+		initATK := int(row.ChInitAtk.Int32)
+		initTECH := int(row.ChInitTech.Int32)
+		maxHP := int(row.ChMaxHp.Int32)
+		maxATK := int(row.ChMaxAtk.Int32)
+		maxTECH := int(row.ChMaxTech.Int32)
+
+		item.Character = &domain.CharacterDetail{
+			CharacterID: row.CharacterID.UUID,
+			HP:          calcLinearStat(initHP, maxHP, level),
+			ATK:         calcLinearStat(initATK, maxATK, level),
+			TECH:        calcLinearStat(initTECH, maxTECH, level),
+
+			InitHP:   initHP,
+			InitATK:  initATK,
+			InitTECH: initTECH,
+			MaxHP:    maxHP,
+			MaxATK:   maxATK,
+			MaxTECH:  maxTECH,
+
+			SpecialType: row.ChSpecialType.String,
+		}
+	}
+
+	if row.EquipmentID.Valid {
+		initBHP := int(row.EqInitBonusHp.Int32)
+		initBATK := int(row.EqInitBonusAtk.Int32)
+		initBTECH := int(row.EqInitBonusTech.Int32)
+		maxBHP := int(row.EqMaxBonusHp.Int32)
+		maxBATK := int(row.EqMaxBonusAtk.Int32)
+		maxBTECH := int(row.EqMaxBonusTech.Int32)
+
+		var buff *string
+		if row.EqBuffEffect.Valid {
+			v := row.EqBuffEffect.String
+			buff = &v
+		}
+
+		item.Equipment = &domain.EquipmentDetail{
+			EquipmentID: row.EquipmentID.UUID,
+			BonusHP:     calcLinearStat(initBHP, maxBHP, level),
+			BonusATK:    calcLinearStat(initBATK, maxBATK, level),
+			BonusTECH:   calcLinearStat(initBTECH, maxBTECH, level),
+
+			InitBonusHP:   int(row.EqInitBonusHp.Int32),
+			InitBonusATK:  int(row.EqInitBonusAtk.Int32),
+			InitBonusTECH: int(row.EqInitBonusTech.Int32),
+			MaxBonusHP:    int(row.EqMaxBonusHp.Int32),
+			MaxBonusATK:   int(row.EqMaxBonusAtk.Int32),
+			MaxBonusTECH:  int(row.EqMaxBonusTech.Int32),
+			BuffEffect:    buff,
+		}
+	}
+
+	return item, nil
 }
