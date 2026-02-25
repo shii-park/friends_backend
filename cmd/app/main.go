@@ -53,6 +53,8 @@ func main() {
 	enhRepo := repository.NewEnhancementRepository(dbConn, queries)
 	enhSvc := service.NewEnhancementService(enhRepo)
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
+	// serviceセットアップ
+	registerSvc := service.NewRegisterService(queries)
 
 	r := gin.Default()
 
@@ -62,7 +64,7 @@ func main() {
 
 	// 認証なしエンドポイント
 	// 新規登録
-	r.POST("/register", handler.RegisterHandler(queries))
+	r.POST("/register", handler.RegisterHandler(registerSvc))
 
 	// 認証が必要なエンドポイント
 	auth := r.Group("/")
