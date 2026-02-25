@@ -59,9 +59,26 @@ func main() {
 	enhSvc := service.NewEnhancementService(enhRepo)
 	enhHandler := handler.NewEnhancementGinHandler(enhSvc)
 
+	// User
+	userRepo := repository.NewUserRepository(queries)
+
+	coinSvc := service.NewCoinService(userRepo)
+	coinHandler := handler.NewCoinGinHandler(coinSvc)
+
+	gachaStoneSvc := service.NewGachaStoneService(userRepo)
+	gachaStoneHandler := handler.NewGachaStoneGinHandler(gachaStoneSvc)
+
+	gachaSvc := service.NewGachaService(dbConn, queries, storageRepo)
+	gachaHandler := handler.NewGachaGinHandler(gachaSvc)
+
 	r := gin.Default()
 	// TODO: 余裕があればCORS設定
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
 	// TODO: クッキーの秘密鍵や名前の変更
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
@@ -78,7 +95,7 @@ func main() {
 		auth.GET("/ping", testHandler)
 		auth.GET("/battle/ws", battleHandler.WS)
 		auth.GET("/gacha/lineup", testHandler)
-		auth.POST("/gacha/draw", testHandler)
+		auth.POST("/gacha/draw", gachaHandler.Draw)
 
 		auth.GET("/storage", storageHandler.ListCards)
 		auth.POST("/storage/cards", storageHandler.AddCard)
@@ -86,6 +103,9 @@ func main() {
 
 		auth.GET("/user/:userID/get", testHandler)
 		auth.DELETE("/user/:userID/delete", testHandler)
+
+		auth.POST("/user/:userID/coin/add", coinHandler.Add)
+		auth.POST("/user/:userID/gacha-stone/add", gachaStoneHandler.Add)
 
 		auth.POST("/card/:instanceID/enhancement", enhHandler.Enhance)
 		auth.POST("/matching", testHandler)

@@ -58,4 +58,18 @@ CREATE TABLE user_cards (
     card_id INTEGER NOT NULL REFERENCES cards(card_id),
     level SMALLINT DEFAULT 1 CHECK (level >= 1 AND level <= 10),
     acquired_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
-)
+);
+
+CREATE TABLE gacha_results (
+    result_id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+
+    instance_id UUID NOT NULL,
+    card_id INT NOT NULL,
+
+    kind TEXT NOT NULL,
+    rarity TEXT NOT NULL,
+    is_pickup BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

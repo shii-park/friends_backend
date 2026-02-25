@@ -46,8 +46,16 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
-		// TODO: フロントへのレスポンスは話し合って調整する
-		c.JSON(http.StatusOK, gin.H{"message": "ユーザー登録が完了しました"})
+		c.JSON(http.StatusOK, gin.H{
+			"userId":          user.ID,
+			"userName":        user.Name,
+			"icon":            user.Icon,
+			"profileMsg":      user.ProfileMessage,
+			"latestLoginDate": user.LatestLoginAt,
+			"streakLogin":     user.StreakLogin,
+			"registeredDate":  user.RegisteredAt,
+			"rp":              user.RankPoint,
+			"coin":            user.Coin,
+		})
 	}
 }

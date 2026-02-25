@@ -31,3 +31,28 @@ UPDATE users
 SET rank_point = sqlc.arg(rank_point)
 WHERE user_id = sqlc.arg(user_id);
 
+-- name: AddUserGachaStone :one
+UPDATE users
+SET gacha_stone = gacha_stone + sqlc.arg(amount)
+WHERE user_id = sqlc.arg(user_id)
+RETURNING gacha_stone;
+
+-- name: ConsumeUserGachaStone :one
+UPDATE users
+SET gacha_stone = gacha_stone - sqlc.arg(amount)
+WHERE user_id = sqlc.arg(user_id)
+  AND gacha_stone >= sqlc.arg(amount)
+RETURNING gacha_stone;
+
+-- name: AddUserCoin :one
+UPDATE users
+SET coin = coin + sqlc.arg(amount)
+WHERE user_id = sqlc.arg(user_id)
+RETURNING coin;
+
+-- name: ConsumeUserCoin :one
+UPDATE users
+SET coin = coin - sqlc.arg(amount)
+WHERE user_id = sqlc.arg(user_id)
+  AND coin >= sqlc.arg(amount)
+RETURNING coin;
