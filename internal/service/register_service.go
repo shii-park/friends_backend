@@ -64,3 +64,11 @@ func (s *RegisterService) RegisterUser(ctx context.Context, name string, icon st
 
 	return user, nil
 }
+
+func (s *RegisterService) DeleteUser(c context.Context, userID string) error {
+	id, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
+	return s.queries.DeleteUser(c, id)
+}

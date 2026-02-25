@@ -42,6 +42,7 @@ func RegisterHandler(svc *service.RegisterService) gin.HandlerFunc {
 		session := sessions.Default(c)
 		session.Set("userID", user.ID)
 		if err := session.Save(); err != nil {
+			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
