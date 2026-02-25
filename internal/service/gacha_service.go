@@ -157,7 +157,30 @@ func (s *GachaService) randPct() float64 {
 	return s.rng.Float64() * 100.0
 }
 
-// 追加：排出キャラ一覧
 func (s *GachaService) ListCharacters(ctx context.Context) ([]repository.GachaCharacter, error) {
 	return s.repo.ListCharacters(ctx)
+}
+
+func (s *GachaService) ListEquipments(ctx context.Context) ([]repository.GachaEquipment, error) {
+	return s.repo.ListEquipments(ctx)
+}
+
+type LineupResponse struct {
+	Characters []repository.GachaCharacter `json:"characters"`
+	Equipments []repository.GachaEquipment `json:"equipments"`
+}
+
+func (s *GachaService) Lineup(ctx context.Context) (LineupResponse, error) {
+	chars, err := s.repo.ListCharacters(ctx)
+	if err != nil {
+		return LineupResponse{}, err
+	}
+	eqs, err := s.repo.ListEquipments(ctx)
+	if err != nil {
+		return LineupResponse{}, err
+	}
+	return LineupResponse{
+		Characters: chars,
+		Equipments: eqs,
+	}, nil
 }

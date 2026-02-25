@@ -62,3 +62,21 @@ func (h *GachaGinHandler) ListCharacters(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
+
+func (h *GachaGinHandler) ListEquipments(c *gin.Context) {
+	items, err := h.svc.ListEquipments(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *GachaGinHandler) Lineup(c *gin.Context) {
+	res, err := h.svc.Lineup(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}

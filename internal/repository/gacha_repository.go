@@ -16,6 +16,7 @@ var ErrNoRows = sql.ErrNoRows
 type GachaRepository interface {
 	Draw(ctx context.Context, userID uuid.UUID, count int) (newStone int, results []DrawResult, err error)
 	ListCharacters(ctx context.Context) ([]GachaCharacter, error)
+	ListEquipments(ctx context.Context) ([]GachaEquipment, error)
 }
 
 type DrawResult struct {
@@ -194,6 +195,82 @@ func (r *gachaRepository) ListCharacters(ctx context.Context) ([]GachaCharacter,
 				MaxATK:      int(row.MaxAtk),
 				MaxTECH:     int(row.MaxTech),
 				SpecialType: specialType,
+			},
+		})
+	}
+	return out, nil
+}
+
+type GachaEquipment struct {
+	Card      GachaCard            `json:"card"`
+	Equipment GachaEquipmentDetail `json:"equipment"`
+}
+
+type GachaEquipmentDetail struct {
+	EquipmentID string `json:"equipmentID"`
+
+	BonusHP   int `json:"bonusHP"`
+	BonusATK  int `json:"bonusATK"`
+	BonusTECH int `json:"bonusTECH"`
+
+	InitBonusHP   int `json:"initBonusHP"`
+	InitBonusATK  int `json:"initBonusATK"`
+	InitBonusTECH int `json:"initBonusTECH"`
+
+	MaxBonusHP   int `json:"maxBonusHP"`
+	MaxBonusATK  int `json:"maxBonusATK"`
+	MaxBonusTECH int `json:"maxBonusTECH"`
+
+	BuffEffect string `json:"buffEffect,omitempty"`
+}
+
+func (r *gachaRepository) ListEquipments(ctx context.Context) ([]GachaEquipment, error) {
+	rows, err := r.q.ListGachaEquipments(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]GachaEquipment, 0, len(rows))
+	for _, row := range rows {
+		// cards 側の nullable 対応（あなたの rarity が NullString だったので同様に）
+		rarity := ""
+		if row.Rarity.Valid {
+			rarity = row.Rarity.String
+		}
+		iconURL := ""
+		if row.CardIconUrl.Valid {
+			iconURL = row.CardIconUrl.String
+		}
+
+		buff := ""
+		if row.BuffEffect.Valid {
+			buff = row.BuffEffect.String
+		}
+
+		out = append(out, GachaEquipment{
+			Card: GachaCard{
+				CardID:      int(row.CardID),
+				CardName:    row.CardName,
+				CardKind:    int(row.CardKind),
+				Rarity:      rarity,
+				CardIconURL: iconURL,
+			},
+			Equipment: GachaEquipmentDetail{
+				EquipmentID: row.EquipmentID.String(),
+
+				BonusHP:   int(row.BonusHp),
+				BonusATK:  int(row.BonusAtk),
+				BonusTECH: int(row.BonusTech),
+
+				InitBonusHP:   int(row.InitBonusHp),
+				InitBonusATK:  int(row.InitBonusAtk),
+				InitBonusTECH: int(row.InitBonusTech),
+
+				MaxBonusHP:   int(row.MaxBonusHp),
+				MaxBonusATK:  int(row.MaxBonusAtk),
+				MaxBonusTECH: int(row.MaxBonusTech),
+
+				BuffEffect: buff,
 			},
 		})
 	}

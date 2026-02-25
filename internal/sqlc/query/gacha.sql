@@ -30,3 +30,27 @@ FROM cards c
 JOIN characters ch ON ch.card_id = c.card_id
 WHERE c.card_kind = 1
 ORDER BY c.card_id ASC;
+
+-- name: ListGachaEquipments :many
+SELECT
+  c.card_id,
+  c.card_name,
+  c.card_kind,
+  c.rarity,
+  c.card_icon_url,
+
+  e.equipment_id,
+  e.bonus_hp,
+  e.bonus_atk,
+  e.bonus_tech,
+  e.init_bonus_hp,
+  e.init_bonus_atk,
+  e.init_bonus_tech,
+  e.max_bonus_hp,
+  e.max_bonus_atk,
+  e.max_bonus_tech,
+  e.buff_effect
+FROM cards c
+JOIN equipments e ON e.card_id = c.card_id
+WHERE c.card_kind = 0
+ORDER BY c.card_id ASC;
