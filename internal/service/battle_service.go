@@ -27,11 +27,11 @@ type BattleSession struct {
 
 // RoundResult は1ラウンドの結果
 type RoundResult struct {
-	PlayerHP int
-	NpcHP    int
-	NpcHand  domain.AttackType
-	IsOver   bool
-	Outcome  string
+	PlayerHP       int
+	NpcHP          int
+	NpcHand        domain.AttackType
+	IsOver         bool
+	Outcome        string
 	RankPointDelta int
 }
 
@@ -93,8 +93,12 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 func (s *BattleService) RoundBattle(ctx context.Context, session *BattleSession, playerHand domain.AttackType) (*RoundResult, error) {
 	npcHand := randomAttackType()
 
-	session.Battle.PlayerAttack(playerHand)
-	session.Battle.OppoAttack(npcHand)
+	jankenResult := domain.JudgeJanken(playerHand, npcHand)
+	if jankenResult == domain.Win {
+		session.Battle.PlayerAttack(playerHand)
+	} else if jankenResult == domain.Lose {
+		session.Battle.OppoAttack(npcHand)
+	}
 
 	playerHP := session.Battle.PlayerHP
 	npcHP := session.Battle.OppoHP
