@@ -77,9 +77,13 @@ func main() {
 	collectionHandler := handler.NewCollectionGinHandler(collectionSvc)
 
 	r := gin.Default()
-	// TODO: 余裕があればCORS設定
+	// CORS設定
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{frontendURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
