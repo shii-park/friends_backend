@@ -38,4 +38,4 @@ jobs:
         with:
           resourceGroup: rg-friends
           containerAppName: friends-app-backend
-          imageToDeploy: ${{ secrets.ACR_NAME }}.azurecr.io/friends-backend:${{ github.sha }}
+          imageToDeploy: ${{ secrets.ACR_NAME }}.azurecr.io/frienkend:${{ github.sha }}

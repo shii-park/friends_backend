@@ -31,11 +31,13 @@ type outMessage struct {
 	RankPointDelta int    `json:"rankPointDelta,omitempty"`
 	Error          string `json:"error,omitempty"`
 	// ready時のNPC情報
-	NpcCharaName   string `json:"npcCharaName,omitempty"`
-	NpcCharaRarity string `json:"npcCharaRarity,omitempty"`
-	NpcEquipName   string `json:"npcEquipName,omitempty"`
-	NpcEquipRarity string `json:"npcEquipRarity,omitempty"`
-	NpcSpecialType string `json:"npcSpecialType,omitempty"`
+	NpcCharaName    string `json:"npcCharaName,omitempty"`
+	NpcCharaRarity  string `json:"npcCharaRarity,omitempty"`
+	NpcCharaIconURL string `json:"npcCharaIconURL,omitempty"`
+	NpcEquipName    string `json:"npcEquipName,omitempty"`
+	NpcEquipRarity  string `json:"npcEquipRarity,omitempty"`
+	NpcEquipIconURL string `json:"npcEquipIconURL,omitempty"`
+	NpcSpecialType  string `json:"npcSpecialType,omitempty"`
 	// game_over時の報酬
 	CoinReward  int `json:"coinReward,omitempty"`
 	StoneReward int `json:"stoneReward,omitempty"`
@@ -99,11 +101,13 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 			if session.NpcChara != nil {
 				resp.NpcCharaName = session.NpcChara.Name
 				resp.NpcCharaRarity = string(session.NpcChara.Rarity)
+				resp.NpcCharaIconURL = session.NpcChara.Icon
 				resp.NpcSpecialType = string(session.NpcChara.SpecialType)
 			}
 			if session.NpcEquip != nil {
 				resp.NpcEquipName = session.NpcEquip.Name
 				resp.NpcEquipRarity = string(session.NpcEquip.Rarity)
+				resp.NpcEquipIconURL = session.NpcEquip.Icon
 			}
 			conn.WriteJSON(resp)
 
