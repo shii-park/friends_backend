@@ -1,3 +1,6 @@
+-- name: CountCards :one
+SELECT COUNT(*) FROM cards;
+
 -- name: GetCharacter :one
 SELECT * FROM characters WHERE character_id=sqlc.arg(character_id) LIMIT 1;
 

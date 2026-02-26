@@ -12,6 +12,17 @@ import (
 	"github.com/google/uuid"
 )
 
+const countCards = `-- name: CountCards :one
+SELECT COUNT(*) FROM cards
+`
+
+func (q *Queries) CountCards(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countCards)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCard = `-- name: CreateCard :one
 INSERT INTO cards (card_name, card_kind, card_icon_url, rarity, card_detail)
 VALUES ($1, $2, $3, $4, $5)

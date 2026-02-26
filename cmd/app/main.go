@@ -41,8 +41,18 @@ func main() {
 	log.Println("データベースのセットアップが正常に完了しました")
 	defer dbConn.Close()
 
+	// データベースの初期化
+	if err := db.InitSchema(dbConn); err != nil {
+		log.Printf("スキーマの初期化に失敗しました: %v", err)
+	}
+
 	// sqlcセットアップ
 	queries := sqlc.New(dbConn)
+
+	// シードデータの投入
+	if err := db.Seed(dbConn, queries); err != nil {
+		log.Printf("シードデータの投入に失敗しました: %v", err)
+	}
 
 	// serviceセットアップ
 	registerSvc := service.NewRegisterService(queries)
