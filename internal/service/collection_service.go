@@ -31,9 +31,10 @@ type CardDTO struct {
 }
 
 type BaseCardDTO struct {
-	ID   string `json:"cardID"` // domainに合わせて文字列で返す（DBはintでもOK）
-	Name string `json:"cardName"`
-	Icon string `json:"cardIcon,omitempty"`
+	ID     string `json:"cardID"` // domainに合わせて文字列で返す（DBはintでもOK）
+	Name   string `json:"cardName"`
+	Icon   string `json:"cardIcon,omitempty"`
+	Detail string `json:"detail,omitempty"`
 
 	Rarity domain.Rarity   `json:"rarity"`
 	Kind   domain.CardKind `json:"cardKind"`
@@ -102,6 +103,7 @@ func toCollectionEntryDTO(r sqlc.ListCollectionRow) (CollectionEntryDTO, error) 
 
 	// icon
 	base.Icon = nullString(r.CardIconUrl)
+	base.Detail = nullString(r.CardDetail)
 
 	// rarity: sql.NullString -> domain.Rarity
 	if r.Rarity.Valid {

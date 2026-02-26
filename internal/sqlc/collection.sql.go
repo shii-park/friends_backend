@@ -20,6 +20,7 @@ SELECT
   c.card_kind,
   c.rarity,
   c.card_icon_url,
+  c.card_detail,
 
   ch.character_id,
   ch.init_hp        AS ch_init_hp,
@@ -41,12 +42,13 @@ SELECT
 
   COALESCE(uc.cnt, 0) AS owned_count,
 
-    COALESCE(
+  COALESCE(
     uc.latest_acquired_date,
     '0001-01-01 00:00:00+00'::timestamptz
-    )::timestamptz AS latest_acquired_date
+  )::timestamptz AS latest_acquired_date
 
 FROM cards c
+
 LEFT JOIN (
   SELECT
     card_id,
@@ -69,6 +71,7 @@ type ListCollectionRow struct {
 	CardKind           int16
 	Rarity             sql.NullString
 	CardIconUrl        sql.NullString
+	CardDetail         sql.NullString
 	CharacterID        uuid.NullUUID
 	ChInitHp           sql.NullInt32
 	ChInitAtk          sql.NullInt32
@@ -104,6 +107,7 @@ func (q *Queries) ListCollection(ctx context.Context, userID uuid.UUID) ([]ListC
 			&i.CardKind,
 			&i.Rarity,
 			&i.CardIconUrl,
+			&i.CardDetail,
 			&i.CharacterID,
 			&i.ChInitHp,
 			&i.ChInitAtk,
