@@ -19,6 +19,10 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /bin/app /app/app
 
+# 実行に必要なSQLファイルとJSONファイルをコピー
+COPY internal/sqlc/schema/schema.sql internal/sqlc/schema/schema.sql
+COPY internal/domain/cards.json internal/domain/cards.json
+
 EXPOSE 8080
 ENV GIN_MODE=release PORT=8080
 ENTRYPOINT ["/app/app"]
