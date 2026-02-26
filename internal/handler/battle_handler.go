@@ -25,8 +25,8 @@ type inMessage struct {
 type outMessage struct {
 	Type string `json:"type"`
 
-	PlayerHP int    `json:"playerHP"`
-	NpcHP    int    `json:"npcHP"`
+	PlayerHP int    `json:"playerHP,omitempty"`
+	NpcHP    int    `json:"npcHP,omitempty"`
 	NpcHand  string `json:"npcHand,omitempty"`
 
 	// 追加：NPCが先に手を決めたときの予告テキスト
