@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand/v2"
 
@@ -25,6 +26,9 @@ type BattleSession struct {
 	UserID   uuid.UUID
 	NpcChara *domain.Character
 	NpcEquip *domain.Equip
+
+	// 追加：次ラウンドでNPCが出す手を「先に確定」して保持する
+	PendingNpcHand *domain.AttackType
 }
 
 // RoundResult は1ラウンドの結果
@@ -49,6 +53,42 @@ var attackTypes = []domain.AttackType{domain.Rock, domain.Scissors, domain.Paper
 
 func randomAttackType() domain.AttackType {
 	return attackTypes[rand.IntN(len(attackTypes))]
+}
+
+// 追加：NPCの手に応じた「予告テキスト」生成
+func npcHandText(hand domain.AttackType) string {
+	switch hand {
+	case domain.Rock:
+		return "次はグーを出すぞ！"
+	case domain.Paper:
+		return "次はパーでいく！"
+	case domain.Scissors:
+		return "次はチョキだ！"
+	default:
+		return ""
+	}
+}
+
+// 追加：prepare_round の戻り値（WSでテキストを返す用）
+type PreparedRound struct {
+	Text string
+}
+
+// 追加：NPCの手を先に決めてセッションに保持する
+func (s *BattleService) PrepareRound(session *BattleSession) (*PreparedRound, error) {
+	if session == nil || session.Battle == nil {
+		return nil, errors.New("invalid battle session")
+	}
+
+	// すでに確定済みならそのまま（連打対策）
+	if session.PendingNpcHand != nil {
+		return &PreparedRound{Text: npcHandText(*session.PendingNpcHand)}, nil
+	}
+
+	hand := randomAttackType()
+	session.PendingNpcHand = &hand
+
+	return &PreparedRound{Text: npcHandText(hand)}, nil
 }
 
 // StartBattle はバトルを初期化してセッションを返す
@@ -92,12 +132,23 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 		UserID:   userID,
 		NpcChara: npcChara,
 		NpcEquip: npcEquip,
+
+		// 追加：開始時は未確定
+		PendingNpcHand: nil,
 	}, nil
 }
 
 // RoundBattle は1ラウンドの攻撃処理を行い結果を返す
 func (s *BattleService) RoundBattle(ctx context.Context, session *BattleSession, playerHand domain.AttackType) (*RoundResult, error) {
-	npcHand := randomAttackType()
+	// NPCの手は「先に確定されたもの」を優先して使う
+	var npcHand domain.AttackType
+	if session.PendingNpcHand != nil {
+		npcHand = *session.PendingNpcHand
+		session.PendingNpcHand = nil // 消費
+	} else {
+		// 保険：prepare_round が呼ばれてない場合でも動く
+		npcHand = randomAttackType()
+	}
 
 	jankenResult := domain.JudgeJanken(playerHand, npcHand)
 	if jankenResult == domain.Win {
