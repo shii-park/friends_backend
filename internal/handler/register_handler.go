@@ -11,8 +11,10 @@ import (
 	"github.com/shii-park/friends/internal/service"
 )
 
-const initialCardID = 4
-const initialEquipID = 38
+const (
+	initialCardID  = 4
+	initialEquipID = 38
+)
 
 // RegisterHandler はユーザー新規登録を処理するハンドラーです
 // ユーザー情報をデータベースに保存し，セッションを保存します．

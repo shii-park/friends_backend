@@ -5,6 +5,7 @@ SELECT
   c.card_kind,
   c.rarity,
   c.card_icon_url,
+  c.card_detail,
 
   ch.character_id,
   ch.init_hp        AS ch_init_hp,
@@ -26,12 +27,13 @@ SELECT
 
   COALESCE(uc.cnt, 0) AS owned_count,
 
-    COALESCE(
+  COALESCE(
     uc.latest_acquired_date,
     '0001-01-01 00:00:00+00'::timestamptz
-    )::timestamptz AS latest_acquired_date
+  )::timestamptz AS latest_acquired_date
 
 FROM cards c
+
 LEFT JOIN (
   SELECT
     card_id,
