@@ -221,6 +221,11 @@ func todomainCharaWithCard(c sqlc.GetCharacterWithCardRow) *domain.Character {
 		int(c.MaxHp), int(c.MaxAtk), int(c.MaxTech),
 		domain.SpecialType(c.SpecialType.String),
 	)
+	if chara != nil {
+		chara.HP = int(c.Hp)
+		chara.ATK = int(c.Atk)
+		chara.TECH = int(c.Tech)
+	}
 	return chara
 }
 
@@ -243,6 +248,11 @@ func todomainEquipWithCard(e sqlc.GetEquipmentWithCardRow) *domain.Equip {
 		int(e.MaxBonusHp), int(e.MaxBonusAtk), int(e.MaxBonusTech),
 		nil,
 	)
+	if equip != nil {
+		equip.BonusHP = int(e.BonusHp)
+		equip.BonusATK = int(e.BonusAtk)
+		equip.BonusTECH = int(e.BonusTech)
+	}
 	return equip
 }
 
@@ -266,6 +276,11 @@ func todomainCharaWithCardFromMany(c sqlc.GetAllCharactersWithCardRow) *domain.C
 		int(c.MaxHp), int(c.MaxAtk), int(c.MaxTech),
 		domain.SpecialType(c.SpecialType.String),
 	)
+	if chara != nil {
+		chara.HP = int(c.Hp)
+		chara.ATK = int(c.Atk)
+		chara.TECH = int(c.Tech)
+	}
 	return chara
 }
 
@@ -288,5 +303,10 @@ func todomainEquipWithCardFromMany(e sqlc.GetAllEquipmentsWithCardRow) *domain.E
 		int(e.MaxBonusHp), int(e.MaxBonusAtk), int(e.MaxBonusTech),
 		nil,
 	)
+	if equip != nil {
+		equip.BonusHP = int(e.BonusHp)
+		equip.BonusATK = int(e.BonusAtk)
+		equip.BonusTECH = int(e.BonusTech)
+	}
 	return equip
 }

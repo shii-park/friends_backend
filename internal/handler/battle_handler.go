@@ -38,6 +38,19 @@ type outMessage struct {
 	NpcEquipRarity  string `json:"npcEquipRarity,omitempty"`
 	NpcEquipIconURL string `json:"npcEquipIconURL,omitempty"`
 	NpcSpecialType  string `json:"npcSpecialType,omitempty"`
+	// ready時の詳細ステータス
+	NpcCharaHP      int `json:"npcCharaHP"`
+	NpcCharaATK     int `json:"npcCharaATK"`
+	NpcCharaTECH    int `json:"npcCharaTECH"`
+	NpcEquipHP      int `json:"npcEquipHP"`
+	NpcEquipATK     int `json:"npcEquipATK"`
+	NpcEquipTECH    int `json:"npcEquipTECH"`
+	PlayerCharaHP   int `json:"playerCharaHP"`
+	PlayerCharaATK  int `json:"playerCharaATK"`
+	PlayerCharaTECH int `json:"playerCharaTECH"`
+	PlayerEquipHP   int `json:"playerEquipHP"`
+	PlayerEquipATK  int `json:"playerEquipATK"`
+	PlayerEquipTECH int `json:"playerEquipTECH"`
 	// game_over時の報酬
 	CoinReward  int `json:"coinReward,omitempty"`
 	StoneReward int `json:"stoneReward,omitempty"`
@@ -98,16 +111,32 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 				PlayerHP: session.Battle.PlayerHP,
 				NpcHP:    session.Battle.OppoHP,
 			}
+			if session.Battle.PlayerCard != nil {
+				resp.PlayerCharaHP = session.Battle.PlayerCard.HP
+				resp.PlayerCharaATK = session.Battle.PlayerCard.ATK
+				resp.PlayerCharaTECH = session.Battle.PlayerCard.TECH
+			}
+			if session.Battle.PlayerEquip != nil {
+				resp.PlayerEquipHP = session.Battle.PlayerEquip.BonusHP
+				resp.PlayerEquipATK = session.Battle.PlayerEquip.BonusATK
+				resp.PlayerEquipTECH = session.Battle.PlayerEquip.BonusTECH
+			}
 			if session.NpcChara != nil {
 				resp.NpcCharaName = session.NpcChara.Name
 				resp.NpcCharaRarity = string(session.NpcChara.Rarity)
 				resp.NpcCharaIconURL = session.NpcChara.Icon
 				resp.NpcSpecialType = string(session.NpcChara.SpecialType)
+				resp.NpcCharaHP = session.NpcChara.HP
+				resp.NpcCharaATK = session.NpcChara.ATK
+				resp.NpcCharaTECH = session.NpcChara.TECH
 			}
 			if session.NpcEquip != nil {
 				resp.NpcEquipName = session.NpcEquip.Name
 				resp.NpcEquipRarity = string(session.NpcEquip.Rarity)
 				resp.NpcEquipIconURL = session.NpcEquip.Icon
+				resp.NpcEquipHP = session.NpcEquip.BonusHP
+				resp.NpcEquipATK = session.NpcEquip.BonusATK
+				resp.NpcEquipTECH = session.NpcEquip.BonusTECH
 			}
 			conn.WriteJSON(resp)
 
