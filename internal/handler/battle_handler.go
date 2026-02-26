@@ -16,20 +16,26 @@ var upgrader = websocket.Upgrader{
 }
 
 type inMessage struct {
-	Type    string `json:"type"`    // "start" | "round"
+	Type    string `json:"type"`    // "start" | "prepare_round" | "round"
 	CharaID string `json:"charaID"` // start時
 	EquipID string `json:"equipID"` // start時
 	Hand    string `json:"hand"`    // round時: "rock"|"paper"|"scissors"
 }
 
 type outMessage struct {
-	Type           string `json:"type"`
-	PlayerHP       int    `json:"playerHP,omitempty"`
-	NpcHP          int    `json:"npcHP,omitempty"`
-	NpcHand        string `json:"npcHand,omitempty"`
+	Type string `json:"type"`
+
+	PlayerHP int    `json:"playerHP,omitempty"`
+	NpcHP    int    `json:"npcHP,omitempty"`
+	NpcHand  string `json:"npcHand,omitempty"`
+
+	// 追加：NPCが先に手を決めたときの予告テキスト
+	NpcHandText string `json:"npcHandText,omitempty"`
+
 	Outcome        string `json:"outcome,omitempty"`
 	RankPointDelta int    `json:"rankPointDelta,omitempty"`
 	Error          string `json:"error,omitempty"`
+
 	// ready時のNPC情報
 	NpcCharaName    string `json:"npcCharaName,omitempty"`
 	NpcCharaRarity  string `json:"npcCharaRarity,omitempty"`
@@ -51,6 +57,7 @@ type outMessage struct {
 	PlayerEquipHP   int `json:"playerEquipHP"`
 	PlayerEquipATK  int `json:"playerEquipATK"`
 	PlayerEquipTECH int `json:"playerEquipTECH"`
+
 	// game_over時の報酬
 	CoinReward  int `json:"coinReward,omitempty"`
 	StoneReward int `json:"stoneReward,omitempty"`
@@ -91,18 +98,18 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 		case "start":
 			charaID, err := uuid.Parse(msg.CharaID)
 			if err != nil {
-				conn.WriteJSON(outMessage{Type: "error", Error: "無効なキャラクターIDです"})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: "無効なキャラクターIDです"})
 				return
 			}
 			equipID, err := uuid.Parse(msg.EquipID)
 			if err != nil {
-				conn.WriteJSON(outMessage{Type: "error", Error: "無効な装備IDです"})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: "無効な装備IDです"})
 				return
 			}
 
 			session, err = h.svc.StartBattle(c.Request.Context(), userID, charaID, equipID)
 			if err != nil {
-				conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
 				return
 			}
 
@@ -138,28 +145,45 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 				resp.NpcEquipATK = session.NpcEquip.BonusATK
 				resp.NpcEquipTECH = session.NpcEquip.BonusTECH
 			}
-			conn.WriteJSON(resp)
+			_ = conn.WriteJSON(resp)
+
+		case "prepare_round":
+			if session == nil {
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: "バトルが開始されていません"})
+				continue
+			}
+
+			prep, err := h.svc.PrepareRound(session)
+			if err != nil {
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
+				return
+			}
+
+			_ = conn.WriteJSON(outMessage{
+				Type:        "npc_hint",
+				NpcHandText: prep.Text,
+			})
 
 		case "round":
 			if session == nil {
-				conn.WriteJSON(outMessage{Type: "error", Error: "バトルが開始されていません"})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: "バトルが開始されていません"})
 				continue
 			}
 
 			hand := domain.AttackType(msg.Hand)
 			if hand != domain.Rock && hand != domain.Paper && hand != domain.Scissors {
-				conn.WriteJSON(outMessage{Type: "error", Error: "無効な手です"})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: "無効な手です"})
 				continue
 			}
 
 			result, err := h.svc.RoundBattle(c.Request.Context(), session, hand)
 			if err != nil {
-				conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
+				_ = conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
 				return
 			}
 
 			if result.IsOver {
-				conn.WriteJSON(outMessage{
+				_ = conn.WriteJSON(outMessage{
 					Type:           "game_over",
 					PlayerHP:       result.PlayerHP,
 					NpcHP:          result.NpcHP,
@@ -172,7 +196,7 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 				return
 			}
 
-			conn.WriteJSON(outMessage{
+			_ = conn.WriteJSON(outMessage{
 				Type:     "round_result",
 				PlayerHP: result.PlayerHP,
 				NpcHP:    result.NpcHP,
@@ -180,7 +204,7 @@ func (h *BattleGinHandler) WS(c *gin.Context) {
 			})
 
 		default:
-			conn.WriteJSON(outMessage{Type: "error", Error: "不明なメッセージタイプです"})
+			_ = conn.WriteJSON(outMessage{Type: "error", Error: "不明なメッセージタイプです"})
 		}
 	}
 }
