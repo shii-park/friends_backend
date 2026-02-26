@@ -202,6 +202,27 @@ func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession
 	return outcome, delta, coinReward, stoneReward, nil
 }
 
+// LoadPlayerData はプレイヤーのキャラクターと装備をロードする（オンラインバトル用）
+func (s *BattleService) LoadPlayerData(ctx context.Context, charaID, equipID uuid.UUID) (*domain.Character, *domain.Equip, error) {
+	dbPlayerChara, err := s.queries.GetCharacterWithCard(ctx, charaID)
+	if err != nil {
+		return nil, nil, errs.ErrInvalidCharaID
+	}
+	dbPlayerEquip, err := s.queries.GetEquipmentWithCard(ctx, equipID)
+	if err != nil {
+		return nil, nil, errs.ErrInvalidEquipID
+	}
+
+	playerChara := todomainCharaWithCard(dbPlayerChara)
+	playerEquip := todomainEquipWithCard(dbPlayerEquip)
+
+	if playerChara == nil || playerEquip == nil {
+		return nil, nil, errs.ErrInvalidCharaID
+	}
+
+	return playerChara, playerEquip, nil
+}
+
 func todomainCharaWithCard(c sqlc.GetCharacterWithCardRow) *domain.Character {
 	rarity := ""
 	if c.Rarity.Valid {
