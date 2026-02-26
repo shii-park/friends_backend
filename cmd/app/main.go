@@ -62,6 +62,8 @@ func main() {
 	storageHandler := handler.NewStorageGinHandler(storageSvc)
 	battleSvc := service.NewBattleService(queries)
 	battleHandler := handler.NewBattleGinHandler(battleSvc)
+	matchmaker := service.NewMatchmaker(queries)
+	onlineBattleHandler := handler.NewOnlineBattleGinHandler(battleSvc, matchmaker)
 
 	// Enhancement
 	enhRepo := repository.NewEnhancementRepository(dbConn, queries)
@@ -111,6 +113,7 @@ func main() {
 	auth.Use(middleware.AuthRequired())
 	{
 		auth.GET("/battle/ws", battleHandler.WS)
+		auth.GET("/battle/online/ws", onlineBattleHandler.WS)
 		auth.GET("/gacha/characters", gachaHandler.ListCharacters)
 		auth.GET("/gacha/equipments", gachaHandler.ListEquipments)
 		auth.GET("/gacha/lineup", gachaHandler.Lineup)
