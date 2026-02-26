@@ -46,6 +46,7 @@ func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageSer
 			if errors.Is(err, errs.ErrUserNameRequired) || errors.Is(err, errs.ErrInvalidBirthday) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
+				c.Error(err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			}
 			return
@@ -54,16 +55,19 @@ func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageSer
 		// 初期カードをDBに保存
 		userUUID, err := uuid.Parse(user.ID)
 		if err != nil {
+			c.Error(err)
 			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			return
 		}
 		if _, err := storageSvc.AddCard(c.Request.Context(), userUUID, initialCardID); err != nil {
+			c.Error(err)
 			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			return
 		}
 		if _, err := storageSvc.AddCard(c.Request.Context(), userUUID, initialEquipID); err != nil {
+			c.Error(err)
 			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
 			return
@@ -73,6 +77,7 @@ func RegisterHandler(svc *service.RegisterService, storageSvc service.StorageSer
 		session := sessions.Default(c)
 		session.Set("userID", user.ID)
 		if err := session.Save(); err != nil {
+			c.Error(err)
 			_ = svc.DeleteUser(c.Request.Context(), user.ID)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
