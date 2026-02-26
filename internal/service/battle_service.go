@@ -51,8 +51,42 @@ func randomAttackType() domain.AttackType {
 	return attackTypes[rand.IntN(len(attackTypes))]
 }
 
+// npcLevelFromRP はプレイヤーのRPに応じたNPCカードレベルを返す。
+// 勝利+10/敗北-5のRP変動を基準に設計（50%勝率で約2.5RP/戦）。
+func npcLevelFromRP(rp int) int {
+	switch {
+	case rp < 50:
+		return 1
+	case rp < 100:
+		return 2
+	case rp < 150:
+		return 3
+	case rp < 200:
+		return 4
+	case rp < 300:
+		return 5
+	case rp < 400:
+		return 6
+	case rp < 500:
+		return 7
+	case rp < 700:
+		return 8
+	case rp < 1000:
+		return 9
+	default:
+		return 10
+	}
+}
+
 // StartBattle はバトルを初期化してセッションを返す
 func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, charaID, equipID uuid.UUID) (*BattleSession, error) {
+	// プレイヤーのRPを取得してNPCレベルを決定
+	dbUser, err := s.queries.GetUser(ctx, userID)
+	if err != nil {
+		return nil, errs.ErrUserNotFound
+	}
+	npcLevel := npcLevelFromRP(int(dbUser.RankPoint))
+
 	// 自分のキャラクター・装備を取得する（カード情報付き）
 	dbPlayerChara, err := s.queries.GetCharacterWithCard(ctx, charaID)
 	if err != nil {
@@ -83,6 +117,14 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 
 	if playerChara == nil || npcChara == nil || playerEquip == nil || npcEquip == nil {
 		return nil, errs.ErrInvalidCharaID
+	}
+
+	// RPに応じたレベルをNPCカードに適用（HP/ATK/TECHが更新される）
+	if err := npcChara.SetLevel(npcLevel); err != nil {
+		return nil, err
+	}
+	if err := npcEquip.SetLevel(npcLevel); err != nil {
+		return nil, err
 	}
 
 	battle := domain.NewBattle(playerChara, npcChara, playerEquip, npcEquip, playerChara.HP, npcChara.HP)
