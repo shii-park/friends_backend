@@ -93,12 +93,18 @@ func (s *BattleService) PrepareRound(session *BattleSession) (*PreparedRound, er
 
 // StartBattle はバトルを初期化してセッションを返す
 func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, charaID, equipID uuid.UUID) (*BattleSession, error) {
-	// 自分のキャラクター・装備を取得する（カード情報付き）
-	dbPlayerChara, err := s.queries.GetCharacterWithCard(ctx, charaID)
+	// 自分のキャラクター・装備を取得する（インスタンスIDを指定してレベル情報等を含めて取得）
+	rowChara, err := s.queries.GetUserCardDetail(ctx, sqlc.GetUserCardDetailParams{
+		UserID:     userID,
+		InstanceID: charaID,
+	})
 	if err != nil {
 		return nil, errs.ErrInvalidCharaID
 	}
-	dbPlayerEquip, err := s.queries.GetEquipmentWithCard(ctx, equipID)
+	rowEquip, err := s.queries.GetUserCardDetail(ctx, sqlc.GetUserCardDetailParams{
+		UserID:     userID,
+		InstanceID: equipID,
+	})
 	if err != nil {
 		return nil, errs.ErrInvalidEquipID
 	}
@@ -116,8 +122,8 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 	dbNpcEquip := allEquips[rand.IntN(len(allEquips))]
 
 	// sqlc型をdomain型に変換
-	playerChara := todomainCharaWithCard(dbPlayerChara)
-	playerEquip := todomainEquipWithCard(dbPlayerEquip)
+	playerChara := toCharacterFromRow(rowChara)
+	playerEquip := toEquipFromRow(rowEquip)
 	npcChara := todomainCharaWithCardFromMany(dbNpcChara)
 	npcEquip := todomainEquipWithCardFromMany(dbNpcEquip)
 
@@ -125,7 +131,11 @@ func (s *BattleService) StartBattle(ctx context.Context, userID uuid.UUID, chara
 		return nil, errs.ErrInvalidCharaID
 	}
 
-	battle := domain.NewBattle(playerChara, npcChara, playerEquip, npcEquip, playerChara.HP, npcChara.HP)
+	// プレイヤーとNPCの開始HP（キャラHP + 装備ボーナスHP）
+	playerStartHP := playerChara.HP + playerEquip.BonusHP
+	npcStartHP := npcChara.HP + npcEquip.BonusHP
+
+	battle := domain.NewBattle(playerChara, npcChara, playerEquip, npcEquip, playerStartHP, npcStartHP)
 
 	return &BattleSession{
 		Battle:   battle,
@@ -254,24 +264,86 @@ func (s *BattleService) finishBattle(ctx context.Context, session *BattleSession
 }
 
 // LoadPlayerData はプレイヤーのキャラクターと装備をロードする（オンラインバトル用）
-func (s *BattleService) LoadPlayerData(ctx context.Context, charaID, equipID uuid.UUID) (*domain.Character, *domain.Equip, error) {
-	dbPlayerChara, err := s.queries.GetCharacterWithCard(ctx, charaID)
+func (s *BattleService) LoadPlayerData(ctx context.Context, userID uuid.UUID, charaID, equipID uuid.UUID) (*domain.Character, *domain.Equip, error) {
+	rowChara, err := s.queries.GetUserCardDetail(ctx, sqlc.GetUserCardDetailParams{
+		UserID:     userID,
+		InstanceID: charaID,
+	})
 	if err != nil {
 		return nil, nil, errs.ErrInvalidCharaID
 	}
-	dbPlayerEquip, err := s.queries.GetEquipmentWithCard(ctx, equipID)
+	rowEquip, err := s.queries.GetUserCardDetail(ctx, sqlc.GetUserCardDetailParams{
+		UserID:     userID,
+		InstanceID: equipID,
+	})
 	if err != nil {
 		return nil, nil, errs.ErrInvalidEquipID
 	}
 
-	playerChara := todomainCharaWithCard(dbPlayerChara)
-	playerEquip := todomainEquipWithCard(dbPlayerEquip)
+	playerChara := toCharacterFromRow(rowChara)
+	playerEquip := toEquipFromRow(rowEquip)
 
 	if playerChara == nil || playerEquip == nil {
 		return nil, nil, errs.ErrInvalidCharaID
 	}
 
 	return playerChara, playerEquip, nil
+}
+
+func toCharacterFromRow(row sqlc.GetUserCardDetailRow) *domain.Character {
+	rarity := ""
+	if row.Rarity.Valid {
+		rarity = row.Rarity.String
+	}
+	iconURL := ""
+	if row.CardIconUrl.Valid {
+		iconURL = row.CardIconUrl.String
+	}
+
+	chara, _ := domain.NewCharacter(
+		fmt.Sprintf("%d", row.CardID),
+		row.CharacterID.UUID.String(),
+		row.CardName,
+		iconURL,
+		domain.Rarity(rarity),
+		int(row.ChInitHp.Int32), int(row.ChInitAtk.Int32), int(row.ChInitTech.Int32),
+		int(row.ChMaxHp.Int32), int(row.ChMaxAtk.Int32), int(row.ChMaxTech.Int32),
+		domain.SpecialType(row.ChSpecialType.String),
+	)
+
+	if chara != nil && row.Level.Valid {
+		chara.SetLevel(int(row.Level.Int16))
+	}
+
+	return chara
+}
+
+func toEquipFromRow(row sqlc.GetUserCardDetailRow) *domain.Equip {
+	rarity := ""
+	if row.Rarity.Valid {
+		rarity = row.Rarity.String
+	}
+	iconURL := ""
+	if row.CardIconUrl.Valid {
+		iconURL = row.CardIconUrl.String
+	}
+
+	equip, _ := domain.NewEquip(
+		fmt.Sprintf("%d", row.CardID),
+		row.EquipmentID.UUID.String(),
+		row.CardName,
+		iconURL,
+		domain.Rarity(rarity),
+		int(row.EqInitBonusHp.Int32), int(row.EqInitBonusAtk.Int32), int(row.EqInitBonusTech.Int32),
+		int(row.EqMaxBonusHp.Int32), int(row.EqMaxBonusAtk.Int32), int(row.EqMaxBonusTech.Int32),
+		nil,
+	)
+
+	if equip != nil && row.Level.Valid {
+		equip.SetLevel(int(row.Level.Int16))
+	}
+
+	return equip
 }
 
 func todomainCharaWithCard(c sqlc.GetCharacterWithCardRow) *domain.Character {

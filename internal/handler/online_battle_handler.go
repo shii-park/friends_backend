@@ -54,7 +54,7 @@ func (h *OnlineBattleGinHandler) WS(c *gin.Context) {
 	}
 
 	// プレイヤーデータをロード
-	chara, equip, err := h.svc.LoadPlayerData(c.Request.Context(), charaID, equipID)
+	chara, equip, err := h.svc.LoadPlayerData(c.Request.Context(), userID, charaID, equipID)
 	if err != nil {
 		conn.WriteJSON(outMessage{Type: "error", Error: err.Error()})
 		return
