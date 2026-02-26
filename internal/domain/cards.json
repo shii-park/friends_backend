@@ -240,7 +240,7 @@
   {
     "card_name": "スキーヤー",
     "card_kind": 1,
-    "card_icon_url": "",
+    "card_icon_url": "ski_freestyle_kosak.png",
     "rarity": "SR",
     "hp": 80,
     "atk": 40,
